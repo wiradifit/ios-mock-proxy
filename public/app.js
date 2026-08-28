@@ -366,8 +366,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     inspReqBody.textContent = formattedReqBody;
 
-    // Convert to Mock button action
+    // Convert to Mock button action (Prefill Response Body, Query Params, Request Body)
     convertToMockBtn.onclick = () => {
+      let prefillParams = '';
+      if (item.request && item.request.queryParams && Object.keys(item.request.queryParams).length > 0) {
+        prefillParams = JSON.stringify(item.request.queryParams, null, 2);
+      }
+
+      let prefillReqBody = '';
+      if (item.request && item.request.body) {
+        try {
+          const parsed = JSON.parse(item.request.body);
+          prefillReqBody = JSON.stringify(parsed, null, 2);
+        } catch (e) {
+          prefillReqBody = item.request.body;
+        }
+      }
+
       openRuleModalForCreate({
         name: `Mock for ${item.path || item.url}`,
         method: item.method,
@@ -375,7 +390,9 @@ document.addEventListener('DOMContentLoaded', () => {
         matchType: 'exact',
         statusCode: item.status || 200,
         delay: 0,
-        body: formattedRespBody
+        body: formattedRespBody,
+        reqOverrideParams: prefillParams,
+        reqOverrideBody: prefillReqBody
       });
     };
   }
@@ -576,6 +593,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     syncActionVisibility();
     ruleModal.style.display = 'flex';
+    setTimeout(() => {
+      if (cmEditorResp) cmEditorResp.refresh();
+      if (cmEditorParams) cmEditorParams.refresh();
+      if (cmEditorReqBody) cmEditorReqBody.refresh();
+    }, 80);
   }
 
   function openRuleModalForEdit(rule) {
@@ -610,6 +632,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     syncActionVisibility();
     ruleModal.style.display = 'flex';
+    setTimeout(() => {
+      if (cmEditorResp) cmEditorResp.refresh();
+      if (cmEditorParams) cmEditorParams.refresh();
+      if (cmEditorReqBody) cmEditorReqBody.refresh();
+    }, 80);
   }
 
   function closeRuleModal() {
