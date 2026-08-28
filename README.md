@@ -380,7 +380,33 @@ See the full [LICENSE](LICENSE) file for complete legal terms.
 
 ---
 
-## 👨‍💻 Author
+## 🤝 Contributing
+
+Contributions, bug fixes, UI improvements, and feature proposals from the developer community are warmly welcome!
+
+### How to Contribute
+1. **Fork the Repository**: Click the **Fork** button at the top right of the GitHub repo.
+2. **Create a Feature Branch**:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+3. **Make Your Improvements**: Adhere to the zero-dependency, pure Node.js architecture.
+4. **Commit Your Work**:
+   ```bash
+   git commit -m "feat: description of your improvement"
+   ```
+5. **Push to Your Fork**:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+6. **Submit a Pull Request (PR)**: Open a PR targeting the `main` branch.
+
+> 🛡️ **Branch Protection & Review Notice:**  
+> The `main` branch is protected with strict branch policies. Direct commits are restricted, and all Pull Requests must be reviewed and approved exclusively by the author and repository maintainer (**Prawira Hadi Fitrajaya** / `fitrajayaprawira@gmail.com`).
+
+---
+
+## 👨‍💻 Author & Maintainer
 
 **Prawira Hadi Fitrajaya** ([@wiradifit](https://github.com/wiradifit))  
 Email: `fttrajayaprawira@gmail.com`
