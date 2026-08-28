@@ -848,7 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
   } else if (urlParams.get('demo') === 'modal') {
     setTimeout(() => {
       openRuleModalForCreate({
-        name: 'Mock User Profile (VIP Tier)',
+        name: 'Mock User Profile API',
         method: 'GET',
         path: '/api/v1/user/profile',
         statusCode: 200,
@@ -856,12 +856,12 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({
           status: 'success',
           data: {
-            id: 'usr_99812',
-            name: 'Alex Johnson',
-            email: 'alex.johnson@example.com',
-            tier: 'Diamond VIP',
-            balance_usd: 145250.00,
-            features: ['instant_transfer', 'zero_fee_trading', 'analytics_pro']
+            user_id: 'usr_1024',
+            name: 'Sarah Connor',
+            email: 'sarah@example.com',
+            role: 'developer',
+            theme: 'dark',
+            notifications_enabled: true
           }
         }, null, 2)
       });

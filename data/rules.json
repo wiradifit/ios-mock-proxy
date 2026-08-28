@@ -1,7 +1,7 @@
 [
   {
     "id": "rule_sample_1",
-    "name": "User Profile (VIP Tier)",
+    "name": "User Profile API",
     "enabled": true,
     "method": "GET",
     "path": "/api/v1/user/profile",
@@ -11,7 +11,7 @@
     "headers": {
       "Content-Type": "application/json"
     },
-    "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"id\": \"usr_99812\",\n    \"name\": \"Alex Johnson\",\n    \"email\": \"alex.johnson@example.com\",\n    \"tier\": \"Diamond VIP\",\n    \"balance_usd\": 145250.00,\n    \"features\": [\n      \"instant_transfer\",\n      \"zero_fee_trading\",\n      \"analytics_pro\"\n    ]\n  }\n}"
+    "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"user_id\": \"usr_1024\",\n    \"name\": \"Sarah Connor\",\n    \"email\": \"sarah@example.com\",\n    \"role\": \"developer\",\n    \"theme\": \"dark\",\n    \"notifications_enabled\": true\n  }\n}"
   },
   {
     "id": "rule_sample_2",
@@ -25,6 +25,6 @@
     "headers": {
       "Content-Type": "application/json"
     },
-    "body": "{\n  \"status\": \"success\",\n  \"count\": 2,\n  \"items\": [\n    {\n      \"id\": \"prod_apple_m3\",\n      \"title\": \"MacBook Pro 16-inch M3 Max\",\n      \"price\": 3499.00,\n      \"currency\": \"USD\",\n      \"in_stock\": true\n    },\n    {\n      \"id\": \"prod_iphone_16\",\n      \"title\": \"iPhone 16 Pro Max 512GB\",\n      \"price\": 1399.00,\n      \"currency\": \"USD\",\n      \"in_stock\": true\n    }\n  ]\n}"
+    "body": "{\n  \"status\": \"success\",\n  \"count\": 2,\n  \"items\": [\n    {\n      \"id\": 1,\n      \"title\": \"Ergonomic Mechanical Keyboard\",\n      \"category\": \"Accessories\",\n      \"price\": 129.99,\n      \"in_stock\": true\n    },\n    {\n      \"id\": 2,\n      \"title\": \"Ultra-Wide 4K Monitor\",\n      \"category\": \"Monitors\",\n      \"price\": 499.99,\n      \"in_stock\": true\n    }\n  ]\n}"
   }
 ]

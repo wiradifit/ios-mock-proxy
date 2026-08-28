@@ -100,10 +100,12 @@ Create or edit mock responses effortlessly with line numbers, syntax highlightin
    {
      "status": "success",
      "data": {
-       "id": "usr_99812",
-       "name": "Alex Johnson",
-       "tier": "Diamond VIP",
-       "balance_usd": 145250.00
+       "user_id": "usr_1024",
+       "name": "Sarah Connor",
+       "email": "sarah@example.com",
+       "role": "developer",
+       "theme": "dark",
+       "notifications_enabled": true
      }
    }
    ```
@@ -125,10 +127,12 @@ Access-Control-Allow-Origin: *
 {
   "status": "success",
   "data": {
-    "id": "usr_99812",
-    "name": "Alex Johnson",
-    "tier": "Diamond VIP",
-    "balance_usd": 145250.00
+    "user_id": "usr_1024",
+    "name": "Sarah Connor",
+    "email": "sarah@example.com",
+    "role": "developer",
+    "theme": "dark",
+    "notifications_enabled": true
   }
 }
 ```
