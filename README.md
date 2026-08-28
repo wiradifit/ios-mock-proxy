@@ -48,7 +48,7 @@ Mocking API responses for **iOS Simulator** and **Xcode** has always been notori
 |                                             |                                                     |
 |                                             v                                                     |
 |                               Forward to Remote Upstream                                          |
-|                             (e.g., https://api.example.com)                                       |
+|                              (e.g., https://pokeapi.co)                                           |
 +---------------------------------------------------------------------------------------------------+
                                               |
                                               v
@@ -94,19 +94,27 @@ Create or edit mock responses effortlessly with line numbers, syntax highlightin
 
 ### Step 1: Define Your Mock Rule in Dashboard
 1. Open `http://localhost:8080/_admin/` and click **＋ Create Mock Rule**.
-2. Set Endpoint Path to `/api/v1/user/profile` and Status Code to `200 OK`.
+2. Set Endpoint Path to `/api/v2/pokemon/pikachu` and Status Code to `200 OK`.
 3. Paste your desired JSON payload in the CodeMirror editor:
    ```json
    {
-     "status": "success",
-     "data": {
-       "user_id": "usr_1024",
-       "name": "Sarah Connor",
-       "email": "sarah@example.com",
-       "role": "developer",
-       "theme": "dark",
-       "notifications_enabled": true
-     }
+     "id": 25,
+     "name": "pikachu",
+     "base_experience": 112,
+     "height": 4,
+     "weight": 60,
+     "is_default": true,
+     "types": [
+       { "slot": 1, "type": { "name": "electric" } }
+     ],
+     "abilities": [
+       { "ability": { "name": "static" }, "is_hidden": false }
+     ],
+     "stats": [
+       { "base_stat": 35, "stat": { "name": "hp" } },
+       { "base_stat": 55, "stat": { "name": "attack" } },
+       { "base_stat": 90, "stat": { "name": "speed" } }
+     ]
    }
    ```
 4. Click **Save Mock Rule**.
@@ -114,7 +122,7 @@ Create or edit mock responses effortlessly with line numbers, syntax highlightin
 ### Step 2: Call the Endpoint from your iOS App or Terminal
 Run the request from your iOS Simulator or terminal:
 ```bash
-curl -i http://localhost:8080/api/v1/user/profile
+curl -i http://localhost:8080/api/v2/pokemon/pikachu
 ```
 
 ### Step 3: Instant Live Verification
@@ -125,15 +133,23 @@ Content-Type: application/json; charset=utf-8
 Access-Control-Allow-Origin: *
 
 {
-  "status": "success",
-  "data": {
-    "user_id": "usr_1024",
-    "name": "Sarah Connor",
-    "email": "sarah@example.com",
-    "role": "developer",
-    "theme": "dark",
-    "notifications_enabled": true
-  }
+  "id": 25,
+  "name": "pikachu",
+  "base_experience": 112,
+  "height": 4,
+  "weight": 60,
+  "is_default": true,
+  "types": [
+    { "slot": 1, "type": { "name": "electric" } }
+  ],
+  "abilities": [
+    { "ability": { "name": "static" }, "is_hidden": false }
+  ],
+  "stats": [
+    { "base_stat": 35, "stat": { "name": "hp" } },
+    { "base_stat": 55, "stat": { "name": "attack" } },
+    { "base_stat": 90, "stat": { "name": "speed" } }
+  ]
 }
 ```
 

@@ -56,7 +56,7 @@
     <div class="header-center">
       <div class="upstream-bar">
         <span class="upstream-label">Upstream Backend:</span>
-        <input type="text" id="quickUpstreamInput" placeholder="https://api.example.com" spellcheck="false" />
+        <input type="text" id="quickUpstreamInput" placeholder="https://pokeapi.co" spellcheck="false" />
         <button id="saveUpstreamBtn" class="btn btn-secondary btn-sm">Save</button>
       </div>
     </div>
@@ -232,7 +232,7 @@
           <div class="guide-step-num">Step 1</div>
           <div class="guide-step-body">
             <h3>Set Upstream Backend Target</h3>
-            <p>Enter your real Staging backend URL in the top bar (e.g. <code>https://api-staging.example.com</code>). When an endpoint is not mocked, requests will seamlessly proxy to this staging backend.</p>
+            <p>Enter your real Staging backend URL in the top bar (e.g. <code>https://pokeapi.co</code>). When an endpoint is not mocked, requests will seamlessly proxy to this staging backend.</p>
           </div>
         </div>
 
@@ -254,7 +254,7 @@
             <h3>Quick Verification with Terminal / curl</h3>
             <p>You can test an endpoint right now from your terminal:</p>
             <div class="code-box">
-              <code>curl -i http://localhost:8080/api/v1/user/profile</code>
+              <code>curl -i http://localhost:8080/api/v2/pokemon/pikachu</code>
             </div>
             <p>You will see the mocked response returned instantly and logged in the <strong>Live Traffic</strong> tab above!</p>
           </div>

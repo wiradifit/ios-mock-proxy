@@ -1,6 +1,6 @@
 {
   "port": 8080,
-  "upstream": "https://api.example.com",
+  "upstream": "https://pokeapi.co",
   "mockMode": "fallback",
   "recordTraffic": true,
   "maxTrafficHistory": 100

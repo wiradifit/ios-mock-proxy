@@ -38,7 +38,7 @@ if (!fs.existsSync(PUBLIC_DIR)) fs.mkdirSync(PUBLIC_DIR, { recursive: true });
 // State
 let config = {
   port: 8080,
-  upstream: 'https://api.example.com',
+  upstream: 'https://pokeapi.co',
   mockMode: 'fallback', // 'fallback' | 'mock_only' | 'passthrough'
   recordTraffic: true,
   maxTrafficHistory: 150

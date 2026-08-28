@@ -855,27 +855,36 @@ document.addEventListener('DOMContentLoaded', () => {
   if (urlParams.get('demo') === 'inspect') {
     setTimeout(() => {
       const rows = Array.from(document.querySelectorAll('.traffic-row'));
-      const targetRow = rows.find(r => r.textContent.includes('/api/v1/user/profile')) || rows[0];
+      const targetRow = rows.find(r => r.textContent.includes('/api/v2/pokemon/pikachu')) || rows[0];
       if (targetRow) targetRow.click();
     }, 500);
   } else if (urlParams.get('demo') === 'modal') {
     setTimeout(() => {
       openRuleModalForCreate({
-        name: 'Mock User Profile API',
+        name: 'Mock Pikachu Stats (PokéAPI)',
         method: 'GET',
-        path: '/api/v1/user/profile',
+        path: '/api/v2/pokemon/pikachu',
         statusCode: 200,
-        delay: 200,
+        delay: 120,
         body: JSON.stringify({
-          status: 'success',
-          data: {
-            user_id: 'usr_1024',
-            name: 'Sarah Connor',
-            email: 'sarah@example.com',
-            role: 'developer',
-            theme: 'dark',
-            notifications_enabled: true
-          }
+          id: 25,
+          name: "pikachu",
+          base_experience: 112,
+          height: 4,
+          weight: 60,
+          is_default: true,
+          types: [
+            { slot: 1, type: { name: "electric" } }
+          ],
+          abilities: [
+            { ability: { name: "static" }, is_hidden: false },
+            { ability: { name: "lightning-rod" }, is_hidden: true }
+          ],
+          stats: [
+            { base_stat: 35, stat: { name: "hp" } },
+            { base_stat: 55, stat: { name: "attack" } },
+            { base_stat: 90, stat: { name: "speed" } }
+          ]
         }, null, 2)
       });
     }, 500);
