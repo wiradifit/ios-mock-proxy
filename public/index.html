@@ -84,7 +84,7 @@
       <span class="tab-badge" id="rulesCountBadge">0</span>
     </button>
     <button class="nav-tab" data-tab="guide">
-      <span class="tab-icon">📱</span> iOS Setup Guide
+      <span class="tab-icon">📱</span> Platform Setup Guide
     </button>
   </nav>
 
@@ -99,104 +99,113 @@
             <span class="search-icon">🔍</span>
             <input type="text" id="trafficFilterInput" placeholder="Search everything (URL, request/response body, headers, status)..." />
           </div>
-          <div class="filter-group">
-            <select id="trafficMethodFilter" class="form-select-sm">
-              <option value="ALL">All Methods</option>
-              <option value="GET">GET</option>
-              <option value="POST">POST</option>
-              <option value="PUT">PUT</option>
-              <option value="PATCH">PATCH</option>
-              <option value="DELETE">DELETE</option>
-            </select>
-            <select id="trafficTypeFilter" class="form-select-sm">
-              <option value="ALL">All Traffic</option>
-              <option value="MOCK">Mocked Only</option>
-              <option value="PROXY">Proxied Only</option>
-              <option value="ERROR">Errors (4xx, 5xx)</option>
-            </select>
-          </div>
+          <select id="methodFilterSelect" class="form-select-sm">
+            <option value="ALL">All Methods</option>
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="PATCH">PATCH</option>
+            <option value="DELETE">DELETE</option>
+          </select>
+          <select id="typeFilterSelect" class="form-select-sm">
+            <option value="ALL">All Traffic</option>
+            <option value="MOCK">Mocks Only</option>
+            <option value="PROXY">Proxied Only</option>
+          </select>
         </div>
         <div class="toolbar-right">
-          <button id="clearTrafficBtn" class="btn btn-outline btn-sm">🗑️ Clear Logs</button>
+          <button id="clearTrafficBtn" class="btn btn-outline btn-sm">
+            <span>🗑️</span> Clear Logs
+          </button>
         </div>
       </div>
 
-      <div class="split-view">
-        <!-- Traffic List Pane -->
+      <div class="traffic-layout">
+        <!-- Left: Traffic List -->
         <div class="traffic-list-pane">
-          <div class="list-table-header">
-            <div class="col col-status">Status</div>
-            <div class="col col-method">Method</div>
-            <div class="col col-path">Endpoint Path</div>
-            <div class="col col-type">Type</div>
-            <div class="col col-time">Duration</div>
+          <div class="traffic-list-header">
+            <span class="col-status">STATUS</span>
+            <span class="col-method">METHOD</span>
+            <span class="col-path">ENDPOINT PATH</span>
+            <span class="col-type">TYPE</span>
+            <span class="col-duration">DURATION</span>
           </div>
-          <div class="traffic-list" id="trafficList">
-            <div class="empty-state">
-              <div class="empty-icon">📡</div>
-              <p>No traffic recorded yet</p>
+          <div class="traffic-list-body" id="trafficListBody">
+            <div class="empty-state" id="trafficEmptyState">
+              <span class="empty-icon">📡</span>
+              <span class="empty-text">No traffic captured yet</span>
               <span class="empty-hint">Requests from your iOS app or test calls to <code>http://localhost:8080/...</code> will stream here live.</span>
             </div>
           </div>
         </div>
 
-        <!-- Request Details / Inspector Pane -->
-        <div class="inspector-pane" id="inspectorPane">
-          <div class="inspector-empty" id="inspectorEmpty">
-            <div class="empty-icon">👈</div>
-            <p>Select a request from the list to inspect details</p>
+        <!-- Right: Inspector Detail Pane -->
+        <div class="traffic-detail-pane" id="trafficDetailPane">
+          <div class="inspector-placeholder" id="inspectorPlaceholder">
+            <span class="placeholder-icon">👉</span>
+            <span class="placeholder-text">Select a request from the list to inspect details</span>
           </div>
 
           <div class="inspector-content" id="inspectorContent" style="display: none;">
             <div class="inspector-header">
               <div class="inspector-title">
-                <span id="inspMethodBadge" class="method-badge">GET</span>
-                <span id="inspPath" class="insp-path">/api/v1/...</span>
+                <span class="method-badge" id="inspMethodBadge">GET</span>
+                <span class="endpoint-path-full" id="inspEndpointPath">/api/v1/resource</span>
               </div>
               <div class="inspector-actions">
-                <button id="convertToMockBtn" class="btn btn-primary btn-sm">⚡ Convert to Mock Rule</button>
+                <button class="btn btn-primary btn-sm" id="convertToMockBtn">
+                  <span>⚡</span> Convert to Mock Rule
+                </button>
               </div>
             </div>
 
             <div class="inspector-meta-bar">
-              <span class="meta-item">Status: <strong id="inspStatusBadge" class="status-pill status-200">200 OK</strong></span>
-              <span class="meta-item">Type: <strong id="inspTypeBadge" class="type-pill type-mock">MOCKED</strong></span>
+              <span class="meta-item">Status: <strong class="status-pill" id="inspStatusPill">200</strong></span>
+              <span class="meta-item">Type: <strong class="type-pill" id="inspTypeBadge">MOCKED</strong></span>
               <span class="meta-item">Duration: <strong id="inspDuration">12ms</strong></span>
-              <span class="meta-item">Time: <strong id="inspTime">09:30:00</strong></span>
+              <span class="meta-item">Time: <strong id="inspTime">12:00:00</strong></span>
             </div>
 
-            <!-- Inspector Sub-tabs -->
+            <!-- Inspector Sub-Tabs -->
             <div class="inspector-subtabs">
-              <button class="subtab active" data-subtab="resp-body">Response Body</button>
-              <button class="subtab" data-subtab="resp-headers">Response Headers</button>
-              <button class="subtab" data-subtab="req-params">Query Params</button>
-              <button class="subtab" data-subtab="req-body">Request Body</button>
-              <button class="subtab" data-subtab="req-headers">Request Headers</button>
+              <button class="subtab-btn active" data-subtab="resp-body">Response Body</button>
+              <button class="subtab-btn" data-subtab="resp-headers">Response Headers</button>
+              <button class="subtab-btn" data-subtab="req-params">Query Params</button>
+              <button class="subtab-btn" data-subtab="req-body">Request Body</button>
+              <button class="subtab-btn" data-subtab="req-headers">Request Headers</button>
             </div>
 
-            <div class="inspector-tab-panes">
-              <div class="subtab-pane active" id="subtab-resp-body">
-                <div class="pane-toolbar">
-                  <span class="pane-title">Response JSON Body</span>
-                  <button class="btn-copy" id="copyRespBodyBtn">📋 Copy</button>
+            <div class="inspector-body-content">
+              <!-- Subtab 1: Response Body -->
+              <div class="subtab-panel active" id="subtab-resp-body">
+                <div class="panel-action-bar">
+                  <span>Response JSON Body</span>
+                  <button class="btn btn-outline btn-xs" id="copyRespBodyBtn">📋 Copy</button>
                 </div>
-                <pre class="code-view"><code id="inspRespBody"></code></pre>
+                <pre class="code-viewer" id="inspRespBody"></pre>
               </div>
 
-              <div class="subtab-pane" id="subtab-resp-headers">
-                <pre class="code-view"><code id="inspRespHeaders"></code></pre>
+              <!-- Subtab 2: Response Headers -->
+              <div class="subtab-panel" id="subtab-resp-headers">
+                <pre class="code-viewer" id="inspRespHeaders"></pre>
               </div>
 
-              <div class="subtab-pane" id="subtab-req-params">
-                <pre class="code-view"><code id="inspReqParams"></code></pre>
+              <!-- Subtab 3: Request Query Params -->
+              <div class="subtab-panel" id="subtab-req-params">
+                <div class="panel-action-bar">
+                  <span>Parsed URL Query Parameters</span>
+                </div>
+                <pre class="code-viewer" id="inspReqParams"></pre>
               </div>
 
-              <div class="subtab-pane" id="subtab-req-body">
-                <pre class="code-view"><code id="inspReqBody"></code></pre>
+              <!-- Subtab 4: Request Body -->
+              <div class="subtab-panel" id="subtab-req-body">
+                <pre class="code-viewer" id="inspReqBody"></pre>
               </div>
 
-              <div class="subtab-pane" id="subtab-req-headers">
-                <pre class="code-view"><code id="inspReqHeaders"></code></pre>
+              <!-- Subtab 5: Request Headers -->
+              <div class="subtab-panel" id="subtab-req-headers">
+                <pre class="code-viewer" id="inspReqHeaders"></pre>
               </div>
             </div>
           </div>
@@ -211,60 +220,106 @@
           <input type="text" id="ruleSearchInput" placeholder="Search mock rules..." />
         </div>
         <div class="toolbar-right">
-          <button id="newRuleBtn" class="btn btn-primary">＋ Create Mock Rule</button>
+          <button id="newRuleBtn" class="btn btn-primary btn-sm">
+            <span>＋</span> Create Mock Rule
+          </button>
         </div>
       </div>
 
       <div class="rules-grid" id="rulesGrid">
-        <!-- Rendered by JavaScript -->
+        <!-- Rendered by JS -->
       </div>
     </section>
 
-    <!-- Tab 3: iOS Setup Guide -->
+    <!-- Tab 3: Platform Setup Guide -->
     <section id="tab-guide" class="tab-content">
       <div class="guide-container">
-        <h2>📱 iOS Simulator & App Setup Guide</h2>
+        <h2>📱 Multi-Platform Setup Guide</h2>
         <p class="guide-intro">
-          LocalMockAPI runs on <code>http://localhost:8080</code>. Follow these simple steps to route your iOS app's network calls through it without touching any system settings.
+          <strong>ios-mock-proxy</strong> runs on <code>http://localhost:8080</code>. Follow the quick setup for your platform below:
         </p>
 
+        <!-- 1. iOS (Top Priority) -->
         <div class="guide-card">
-          <div class="guide-step-num">Step 1</div>
+          <div class="guide-step-num">🍎 iOS</div>
           <div class="guide-step-body">
-            <h3>Set Upstream Backend Target</h3>
-            <p>Enter your real Staging backend URL in the top bar (e.g. <code>https://pokeapi.co</code>). When an endpoint is not mocked, requests will seamlessly proxy to this staging backend.</p>
-          </div>
-        </div>
-
-        <div class="guide-card">
-          <div class="guide-step-num">Step 2</div>
-          <div class="guide-step-body">
-            <h3>Update Base URL in your iOS Codebase</h3>
-            <p>In your app's environment configuration (e.g. <code>EnvironmentURL.swift</code> or Debug Scheme settings), set your Base URL to:</p>
+            <h3>iOS (Swift / SwiftUI / UIKit / Simulator & Device)</h3>
+            <p>Point your app's base API URL to the proxy running on your Mac's localhost:</p>
             <div class="code-box">
-              <code>http://localhost:8080</code>
+              <code>// For iOS Simulator:
+static let baseURL = URL(string: "http://localhost:8080/api/")!
+
+// For Physical iPhone (Same Wi-Fi network):
+static let baseURL = URL(string: "http://192.168.1.50:8080/api/")!</code>
             </div>
-            <p class="note">💡 <strong>Simulator Tip:</strong> The iOS Simulator runs on your Mac's localhost network. No Wi-Fi proxy or SSL certificates are needed!</p>
+            <p class="note">💡 <strong>Info.plist (ATS Note):</strong> Allow local HTTP networking during development:</p>
+            <div class="code-box">
+              <code>&lt;key&gt;NSAppTransportSecurity&lt;/key&gt;
+&lt;dict&gt;
+    &lt;key&gt;NSAllowsLocalNetworking&lt;/key&gt;
+    &lt;true/&gt;
+&lt;/dict&gt;</code>
+            </div>
           </div>
         </div>
 
+        <!-- 2. Android -->
         <div class="guide-card">
-          <div class="guide-step-num">Step 3</div>
+          <div class="guide-step-num">🤖 Android</div>
           <div class="guide-step-body">
-            <h3>Quick Verification with Terminal / curl</h3>
-            <p>You can test an endpoint right now from your terminal:</p>
+            <h3>Android (Kotlin / Java / Retrofit / OkHttp)</h3>
+            <p>Android Emulators access your host machine's localhost via the special IP <code>10.0.2.2</code>:</p>
+            <div class="code-box">
+              <code>val baseUrl = if (BuildConfig.DEBUG) {
+    "http://10.0.2.2:8080/api/" // Android Emulator
+} else {
+    "https://api.example.com/api/"
+}</code>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Flutter & React Native -->
+        <div class="guide-card">
+          <div class="guide-step-num">💙 Cross-Platform</div>
+          <div class="guide-step-body">
+            <h3>Flutter & React Native</h3>
+            <p>Detect platform dynamically to use <code>localhost</code> on iOS and <code>10.0.2.2</code> on Android:</p>
+            <div class="code-box">
+              <code>// Flutter (Dart):
+String baseUrl = Platform.isAndroid ? "http://10.0.2.2:8080/api" : "http://localhost:8080/api";
+
+// React Native (TypeScript):
+const BASE_URL = Platform.select({
+  ios: 'http://localhost:8080/api',
+  android: 'http://10.0.2.2:8080/api',
+});</code>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Web & Frontend -->
+        <div class="guide-card">
+          <div class="guide-step-num">💻 Web</div>
+          <div class="guide-step-body">
+            <h3>Web Frontends (React, Vue, Vite, Next.js, Axios)</h3>
+            <p>Set your local environment variable or Axios baseURL:</p>
+            <div class="code-box">
+              <code>VITE_API_BASE_URL=http://localhost:8080/api</code>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Quick Verification -->
+        <div class="guide-card">
+          <div class="guide-step-num">⚡ Test</div>
+          <div class="guide-step-body">
+            <h3>Quick Verification with curl</h3>
+            <p>Test the mock proxy right now from your terminal:</p>
             <div class="code-box">
               <code>curl -i http://localhost:8080/api/v2/pokemon/pikachu</code>
             </div>
-            <p>You will see the mocked response returned instantly and logged in the <strong>Live Traffic</strong> tab above!</p>
-          </div>
-        </div>
-
-        <div class="guide-card">
-          <div class="guide-step-num">Step 4</div>
-          <div class="guide-step-body">
-            <h3>Physical Device on Local Wi-Fi (Optional)</h3>
-            <p>If testing on a physical iPhone connected to the same Wi-Fi network as your Mac, find your Mac's local IP address (e.g. <code>192.168.1.50</code>) and set the app's Base URL to <code>http://192.168.1.50:8080</code>.</p>
+            <p>You will see the mocked response returned instantly and logged in the <strong>Live Traffic</strong> tab!</p>
           </div>
         </div>
       </div>
