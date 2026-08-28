@@ -1,4 +1,17 @@
-// LocalMockAPI Frontend Controller
+/**
+ * ----------------------------------------------------------------------------------
+ * ios-mock-proxy Web Dashboard Frontend Controller
+ * ----------------------------------------------------------------------------------
+ * @author       Prawira Hadi Fitrajaya (@wiradifit)
+ * @email        fttrajayaprawira@gmail.com
+ * @copyright    Copyright (c) 2026 Prawira Hadi Fitrajaya. All Rights Reserved.
+ * @license      Non-Commercial Software License Agreement
+ * ----------------------------------------------------------------------------------
+ * Strictly for personal, non-commercial use. Unauthorized commercialization is prohibited
+ * and subject to legal action under national and international copyright law.
+ * ----------------------------------------------------------------------------------
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
   // State
   let config = {};

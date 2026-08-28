@@ -367,15 +367,16 @@ PORT=8888 ./start.sh
 
 ---
 
-## 📄 License
+## 📄 License & Legal Notice
 
 This project is licensed under a **Custom Non-Commercial Software License Agreement**:
-- ✅ **Free for Personal, Educational, and Research Use**: You are free to run, modify, and test this project for personal and non-commercial development.
-- ⛔ **Commercial Use Restriction**: Any commercial exploitation, redistribution for profit, sublicensing, or integration into commercial products/services is strictly prohibited without prior written permission from the copyright holder.
+- ✅ **Free for Personal, Educational, and Research Use**: You are free to run, modify, and test this project for personal, hobbyist, and non-commercial development.
+- ⛔ **Commercial Use & Commercialization Strictly Prohibited**: Any unauthorized commercial use, commercial distribution, sublicensing, SaaS hosting for revenue, or incorporation into commercial products is strictly prohibited without prior explicit written license from **Prawira Hadi Fitrajaya**.
+- ⚖️ **Legal Enforcement**: This software is protected by international treaties (Berne Convention, WIPO Copyright Treaty, TRIPS, DMCA) and national statutory copyright legislation (UU No. 28/2014 tentang Hak Cipta). Unauthorized commercialization constitutes willful infringement and will be prosecuted under civil and criminal legal jurisdictions.
 
 For commercial licensing and permissions, contact: `fttrajayaprawira@gmail.com`.
 
-See the full [LICENSE](LICENSE) file for legal terms.
+See the full [LICENSE](LICENSE) file for complete legal terms.
 
 ---
 

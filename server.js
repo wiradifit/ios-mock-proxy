@@ -1,3 +1,22 @@
+/**
+ * ----------------------------------------------------------------------------------
+ * ios-mock-proxy (LocalMockAPI)
+ * ----------------------------------------------------------------------------------
+ * @author       Prawira Hadi Fitrajaya (@wiradifit)
+ * @email        fttrajayaprawira@gmail.com
+ * @copyright    Copyright (c) 2026 Prawira Hadi Fitrajaya. All Rights Reserved.
+ * @license      Non-Commercial Software License Agreement
+ * ----------------------------------------------------------------------------------
+ * LEGAL NOTICE:
+ * This software and its architecture are strictly licensed for personal, educational,
+ * and non-commercial development purposes. Commercialization, unauthorized distribution,
+ * resale, sublicensing, or proprietary inclusion without express written consent from
+ * Prawira Hadi Fitrajaya is strictly prohibited and subject to civil and criminal legal
+ * enforcement under national copyright law (UU No. 28/2014) and international treaties
+ * (Berne Convention, WIPO Copyright Treaty, TRIPS, DMCA).
+ * ----------------------------------------------------------------------------------
+ */
+
 const http = require('http');
 const https = require('https');
 const fs = require('fs');
