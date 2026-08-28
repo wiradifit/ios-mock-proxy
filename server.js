@@ -73,6 +73,10 @@ function saveRules() {
 loadConfig();
 loadRules();
 
+// Security & Performance Limits
+const MAX_BODY_SIZE = 25 * 1024 * 1024; // 25 MB max request body limit
+const MAX_LOG_BODY_LENGTH = 512 * 1024; // 512 KB preview limit per traffic log to prevent memory bloat
+
 // Helper: Broadcast SSE event to all connected UI clients
 function broadcastEvent(type, data) {
   const payload = `event: ${type}\ndata: ${JSON.stringify(data)}\n\n`;
@@ -85,21 +89,55 @@ function broadcastEvent(type, data) {
   }
 }
 
+// Helper: Truncate large body string for memory-safe traffic logging
+function truncateForLog(bodyStr) {
+  if (!bodyStr || typeof bodyStr !== 'string') return bodyStr || '';
+  if (bodyStr.length > MAX_LOG_BODY_LENGTH) {
+    return bodyStr.substring(0, MAX_LOG_BODY_LENGTH) + '\n\n... [Log truncated: payload exceeds 512 KB]';
+  }
+  return bodyStr;
+}
+
 // Helper: Add traffic log and notify SSE
 function addTrafficLog(log) {
   if (!config.recordTraffic) return;
-  trafficLogs.unshift(log);
+  
+  // Safe bounded log entry
+  const safeLog = {
+    ...log,
+    request: log.request ? {
+      ...log.request,
+      body: truncateForLog(log.request.body)
+    } : {},
+    response: log.response ? {
+      ...log.response,
+      body: truncateForLog(log.response.body)
+    } : {}
+  };
+
+  trafficLogs.unshift(safeLog);
   if (trafficLogs.length > (config.maxTrafficHistory || 150)) {
     trafficLogs.pop();
   }
-  broadcastEvent('traffic', log);
+  broadcastEvent('traffic', safeLog);
 }
 
-// Helper: Read complete request body
+// Helper: Read complete request body with DoS protection
 function readRequestBody(req) {
   return new Promise((resolve, reject) => {
+    let size = 0;
     const chunks = [];
-    req.on('data', chunk => chunks.push(chunk));
+    
+    req.on('data', chunk => {
+      size += chunk.length;
+      if (size > MAX_BODY_SIZE) {
+        req.destroy();
+        reject(new Error('PAYLOAD_TOO_LARGE'));
+        return;
+      }
+      chunks.push(chunk);
+    });
+    
     req.on('end', () => resolve(Buffer.concat(chunks)));
     req.on('error', reject);
   });
@@ -201,6 +239,20 @@ async function handleAdmin(req, res, parsedUrl) {
     const rawBody = await readRequestBody(req);
     const updated = safeJsonParse(rawBody.toString('utf8'));
     if (updated) {
+      // Validate upstream protocol if provided
+      if (updated.upstream) {
+        const trimmed = updated.upstream.trim();
+        if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ error: 'Upstream URL must start with http:// or https://' }));
+        }
+      }
+      
+      // Prevent prototype pollution
+      delete updated.__proto__;
+      delete updated.constructor;
+      delete updated.prototype;
+
       config = { ...config, ...updated };
       saveConfig();
       broadcastEvent('config_updated', config);
@@ -223,6 +275,11 @@ async function handleAdmin(req, res, parsedUrl) {
       res.writeHead(400, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ error: 'Rule requires at least a path' }));
     }
+
+    // Prevent prototype pollution
+    delete ruleData.__proto__;
+    delete ruleData.constructor;
+    delete ruleData.prototype;
 
     if (!ruleData.id) {
       ruleData.id = 'rule_' + crypto.randomBytes(6).toString('hex');
@@ -276,10 +333,19 @@ async function handleAdmin(req, res, parsedUrl) {
     return res.end(JSON.stringify({ status: 'ok' }));
   }
 
-  // Static Assets for Dashboard UI
+  // Static Assets for Dashboard UI (Path Traversal Protected)
   let filePath = pathname.replace(/^\/_admin/, '');
   if (filePath === '' || filePath === '/') filePath = '/index.html';
-  const absolutePath = path.join(PUBLIC_DIR, filePath);
+  
+  // Normalize and prevent path traversal
+  const normalizedPath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, '');
+  const absolutePath = path.resolve(PUBLIC_DIR, '.' + (normalizedPath.startsWith('/') ? normalizedPath : '/' + normalizedPath));
+
+  // Verify file resides strictly within PUBLIC_DIR
+  if (!absolutePath.startsWith(path.resolve(PUBLIC_DIR))) {
+    res.writeHead(403, { 'Content-Type': 'text/plain' });
+    return res.end('Forbidden: Access Denied');
+  }
 
   if (fs.existsSync(absolutePath) && fs.statSync(absolutePath).isFile()) {
     const ext = path.extname(absolutePath).toLowerCase();
@@ -479,8 +545,18 @@ const server = http.createServer(async (req, res) => {
     return res.end();
   }
 
-  // Read incoming request body
-  const reqBody = await readRequestBody(req);
+  // Read incoming request body safely
+  let reqBody;
+  try {
+    reqBody = await readRequestBody(req);
+  } catch (err) {
+    if (err.message === 'PAYLOAD_TOO_LARGE') {
+      res.writeHead(413, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ error: 'PAYLOAD_TOO_LARGE', message: 'Request payload exceeded 25 MB limit' }));
+    }
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ error: 'BAD_REQUEST', message: 'Failed to read request stream: ' + err.message }));
+  }
 
   // Passthrough mode (ignores mocks)
   if (config.mockMode === 'passthrough') {
@@ -633,9 +709,10 @@ const server = http.createServer(async (req, res) => {
 });
 
 const PORT = process.env.PORT || config.port || 8080;
-server.listen(PORT, '0.0.0.0', () => {
+const HOST = process.env.HOST || '0.0.0.0';
+server.listen(PORT, HOST, () => {
   console.log('====================================================');
-  console.log(`  🚀 LocalMockAPI Server is running!`);
+  console.log(`  🚀 ios-mock-proxy Server is running on ${HOST}:${PORT}!`);
   console.log(`  📊 Web Dashboard:  http://localhost:${PORT}/_admin/`);
   console.log(`  🌐 Proxy / Mock:    http://localhost:${PORT}/`);
   console.log(`  📡 Upstream Target: ${config.upstream || '(None configured)'}`);

@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# LocalMockAPI Quick Launcher
+# ios-mock-proxy Quick Launcher
 # Zero dependencies, zero sudo required
 
 cd "$(dirname "$0")"
 
 echo "=================================================="
-echo "  ⚡ Starting LocalMockAPI Server..."
+echo "  ⚡ Starting ios-mock-proxy Server..."
 echo "=================================================="
 
 # Check if node is available

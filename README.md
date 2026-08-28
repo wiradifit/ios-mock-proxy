@@ -251,6 +251,44 @@ The dashboard interacts with `ios-mock-proxy` via internal REST endpoints:
 
 ---
 
+## 🔒 Security Architecture & Network Safety
+
+`ios-mock-proxy` is engineered with defense-in-depth measures to ensure safe local network interception:
+
+### 1. Zero-Sudo & User-Space Isolation
+- Runs entirely as an unprivileged, standard user process.
+- Does not modify OS network adapter configurations, packet filters (`pf`), or system trust stores.
+- Does not install kernel extensions or background system daemons.
+
+### 2. Path Traversal & File Access Protection
+- All static asset requests under `/_admin/` are strictly normalized and resolved against `public/`.
+- Paths attempting traversal (e.g. `/_admin/../../../../etc/passwd`) are detected and blocked with `403 Forbidden: Access Denied`.
+
+### 3. Denial of Service (DoS) & Memory Exhaustion Defenses
+- **Payload Ceiling (`MAX_BODY_SIZE = 25 MB`)**: Request streams exceeding 25 MB are immediately terminated with `413 Payload Too Large`.
+- **Log Payload Bounding (`512 KB`)**: Traffic history payloads are truncated in the UI logger to prevent memory exhaustion during heavy sessions.
+- **Ring-Buffered Logs (`maxTrafficHistory = 150`)**: In-memory logs automatically roll over to guarantee fixed memory consumption.
+
+### 4. Protocol Validation & Anti-SSRF Safeguards
+- Upstream target URLs are strictly validated to allow only `http://` and `https://` schemes.
+- Configuration payloads are scrubbed to eliminate Prototype Pollution (`__proto__`, `constructor`, `prototype`).
+
+### 5. Sensitive Token Hygiene & Volatility
+- All live traffic logs are stored **strictly in volatile memory** (RAM).
+- No request/response bodies, bearer tokens, or session cookies are ever written to disk or transmitted to third-party telemetry services.
+- Stopping the server process immediately wipes all recorded traffic history from memory.
+
+### 6. Network Interface Binding (`0.0.0.0` vs `127.0.0.1`)
+- By default, the server binds to `0.0.0.0` to permit physical iPhones and Android devices on the same local Wi-Fi to reach the proxy.
+- For strict, isolated localhost-only binding (e.g. on untrusted public Wi-Fi networks), you can set `HOST=127.0.0.1`:
+  ```bash
+  HOST=127.0.0.1 ./start.sh
+  ```
+
+> ⚠️ **Development Use Only Notice:** `ios-mock-proxy` is intended exclusively for local development, staging verification, and automated testing. It should never be exposed as an unauthenticated gateway to the public internet.
+
+---
+
 ## ❓ FAQ & Troubleshooting
 
 ### Port 8080 is in use
