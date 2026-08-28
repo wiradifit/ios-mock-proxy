@@ -40,22 +40,24 @@
   <header class="app-header">
     <div class="header-left">
       <div class="logo">
-        <div class="logo-icon">⚡</div>
+        <div class="logo-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
         <div class="logo-text">
-          <span class="brand">LocalMockAPI</span>
-          <span class="badge badge-dev">iOS Mock & Proxy</span>
+          <span class="brand">ios-mock-proxy</span>
+          <span class="badge badge-dev">v1.0</span>
         </div>
       </div>
       <div class="live-status" id="liveStatus">
         <span class="status-dot"></span>
-        <span class="status-label">Live Connected</span>
+        <span class="status-label">Connected</span>
       </div>
     </div>
 
     <!-- Quick Upstream Bar -->
     <div class="header-center">
       <div class="upstream-bar">
-        <span class="upstream-label">Upstream Backend:</span>
+        <span class="upstream-label">Upstream:</span>
         <input type="text" id="quickUpstreamInput" placeholder="https://pokeapi.co" spellcheck="false" />
         <button id="saveUpstreamBtn" class="btn btn-secondary btn-sm">Save</button>
       </div>
@@ -76,15 +78,15 @@
   <!-- Navigation Tabs -->
   <nav class="nav-tabs">
     <button class="nav-tab active" data-tab="traffic">
-      <span class="tab-icon">📡</span> Live Traffic
+      Live Traffic
       <span class="tab-badge" id="trafficCountBadge">0</span>
     </button>
     <button class="nav-tab" data-tab="rules">
-      <span class="tab-icon">📋</span> Mock Rules
+      Mock Rules
       <span class="tab-badge" id="rulesCountBadge">0</span>
     </button>
     <button class="nav-tab" data-tab="guide">
-      <span class="tab-icon">📱</span> Platform Setup Guide
+      Platform Guide
     </button>
   </nav>
 
@@ -96,8 +98,8 @@
       <div class="traffic-toolbar">
         <div class="toolbar-left">
           <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="trafficFilterInput" placeholder="Search everything (URL, request/response body, headers, status)..." />
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="trafficFilterInput" placeholder="Filter requests (URL, body, headers, status)..." />
           </div>
           <div class="filter-group">
             <select id="trafficMethodFilter" class="form-select-sm">
@@ -117,7 +119,7 @@
           </div>
         </div>
         <div class="toolbar-right">
-          <button id="clearTrafficBtn" class="btn btn-outline btn-sm">🗑️ Clear Logs</button>
+          <button id="clearTrafficBtn" class="btn btn-outline btn-sm">Clear Logs</button>
         </div>
       </div>
 
@@ -133,9 +135,8 @@
           </div>
           <div class="traffic-list" id="trafficList">
             <div class="empty-state">
-              <div class="empty-icon">📡</div>
               <p>No traffic recorded yet</p>
-              <span class="empty-hint">Requests from your iOS app or test calls to <code>http://localhost:8080/...</code> will stream here live.</span>
+              <span class="empty-hint">Network requests from your iOS app or test calls to <code>http://localhost:8080/...</code> will stream here live.</span>
             </div>
           </div>
         </div>
@@ -143,7 +144,6 @@
         <!-- Request Details / Inspector Pane -->
         <div class="inspector-pane" id="inspectorPane">
           <div class="inspector-empty" id="inspectorEmpty">
-            <div class="empty-icon">👈</div>
             <p>Select a request from the list to inspect details</p>
           </div>
 
@@ -154,7 +154,7 @@
                 <span id="inspPath" class="insp-path">/api/v1/...</span>
               </div>
               <div class="inspector-actions">
-                <button id="convertToMockBtn" class="btn btn-primary btn-sm">⚡ Convert to Mock Rule</button>
+                <button id="convertToMockBtn" class="btn btn-primary btn-sm">Convert to Mock Rule</button>
               </div>
             </div>
 
@@ -178,7 +178,7 @@
               <div class="subtab-pane active" id="subtab-resp-body">
                 <div class="pane-toolbar">
                   <span class="pane-title">Response JSON Body</span>
-                  <button class="btn-copy" id="copyRespBodyBtn">📋 Copy</button>
+                  <button class="btn-copy" id="copyRespBodyBtn">Copy</button>
                 </div>
                 <pre class="code-view"><code id="inspRespBody"></code></pre>
               </div>
@@ -211,7 +211,7 @@
           <input type="text" id="ruleSearchInput" placeholder="Search mock rules..." />
         </div>
         <div class="toolbar-right">
-          <button id="newRuleBtn" class="btn btn-primary">＋ Create Mock Rule</button>
+          <button id="newRuleBtn" class="btn btn-primary">+ New Rule</button>
         </div>
       </div>
 
@@ -223,14 +223,14 @@
     <!-- Tab 3: Platform Setup Guide -->
     <section id="tab-guide" class="tab-content">
       <div class="guide-container">
-        <h2>📱 Multi-Platform Setup Guide</h2>
+        <h2>Multi-Platform Setup Guide</h2>
         <p class="guide-intro">
-          <strong>ios-mock-proxy</strong> runs on <code>http://localhost:8080</code>. Follow the quick setup for your platform below:
+          <strong>ios-mock-proxy</strong> runs locally on <code>http://localhost:8080</code>. Configure your target client environment using the snippets below:
         </p>
 
         <!-- 1. iOS (Top Priority) -->
         <div class="guide-card">
-          <div class="guide-step-num">🍎 iOS</div>
+          <div class="guide-step-num">iOS</div>
           <div class="guide-step-body">
             <h3>iOS (Swift / SwiftUI / UIKit / Simulator & Device)</h3>
             <p>Point your app's base API URL to the proxy running on your Mac's localhost:</p>
@@ -241,7 +241,7 @@ static let baseURL = URL(string: "http://localhost:8080/api/")!
 // For Physical iPhone (Same Wi-Fi network):
 static let baseURL = URL(string: "http://192.168.1.50:8080/api/")!</code>
             </div>
-            <p class="note">💡 <strong>Info.plist (ATS Note):</strong> Allow local HTTP networking during development:</p>
+            <p class="note"><strong>App Transport Security (ATS):</strong> Ensure local HTTP networking is permitted during development in <code>Info.plist</code>:</p>
             <div class="code-box">
               <code>&lt;key&gt;NSAppTransportSecurity&lt;/key&gt;
 &lt;dict&gt;
@@ -254,10 +254,10 @@ static let baseURL = URL(string: "http://192.168.1.50:8080/api/")!</code>
 
         <!-- 2. Android -->
         <div class="guide-card">
-          <div class="guide-step-num">🤖 Android</div>
+          <div class="guide-step-num">Android</div>
           <div class="guide-step-body">
             <h3>Android (Kotlin / Java / Retrofit / OkHttp)</h3>
-            <p>Android Emulators access your host machine's localhost via the special IP <code>10.0.2.2</code>:</p>
+            <p>Android Emulators access your host machine's localhost via the loopback alias <code>10.0.2.2</code>:</p>
             <div class="code-box">
               <code>val baseUrl = if (BuildConfig.DEBUG) {
     "http://10.0.2.2:8080/api/" // Android Emulator
@@ -270,10 +270,10 @@ static let baseURL = URL(string: "http://192.168.1.50:8080/api/")!</code>
 
         <!-- 3. Flutter & React Native -->
         <div class="guide-card">
-          <div class="guide-step-num">💙 Cross-Platform</div>
+          <div class="guide-step-num">Cross-Platform</div>
           <div class="guide-step-body">
             <h3>Flutter & React Native</h3>
-            <p>Detect platform dynamically to use <code>localhost</code> on iOS and <code>10.0.2.2</code> on Android:</p>
+            <p>Detect platform dynamically to route to <code>localhost</code> on iOS and <code>10.0.2.2</code> on Android:</p>
             <div class="code-box">
               <code>// Flutter (Dart):
 String baseUrl = Platform.isAndroid ? "http://10.0.2.2:8080/api" : "http://localhost:8080/api";
@@ -289,7 +289,7 @@ const BASE_URL = Platform.select({
 
         <!-- 4. Web & Frontend -->
         <div class="guide-card">
-          <div class="guide-step-num">💻 Web</div>
+          <div class="guide-step-num">Web</div>
           <div class="guide-step-body">
             <h3>Web Frontends (React, Vue, Vite, Next.js, Axios)</h3>
             <p>Set your local environment variable or Axios baseURL:</p>
@@ -301,10 +301,10 @@ const BASE_URL = Platform.select({
 
         <!-- 5. Quick Verification -->
         <div class="guide-card">
-          <div class="guide-step-num">⚡ Test</div>
+          <div class="guide-step-num">Terminal</div>
           <div class="guide-step-body">
-            <h3>Quick Verification with curl</h3>
-            <p>Test the mock proxy right now from your terminal:</p>
+            <h3>Verification with curl</h3>
+            <p>Test the mock proxy from your terminal:</p>
             <div class="code-box">
               <code>curl -i http://localhost:8080/api/v2/pokemon/pikachu</code>
             </div>
@@ -404,7 +404,7 @@ const BASE_URL = Platform.select({
             <label for="ruleBody">Response Body (JSON)</label>
             <div class="editor-tools">
               <span id="jsonValidationMsgResp" class="validation-msg">Valid JSON</span>
-              <button type="button" id="prettifyJsonBtnResp" class="btn btn-outline btn-xs">✨ Prettify JSON</button>
+              <button type="button" id="prettifyJsonBtnResp" class="btn btn-outline btn-xs">Format JSON</button>
             </div>
           </div>
           <div class="editor-wrapper">
@@ -417,7 +417,7 @@ const BASE_URL = Platform.select({
             <label for="reqOverrideParams">URL Query Params Override (JSON)</label>
             <div class="editor-tools">
               <span id="jsonValidationMsgParams" class="validation-msg">Valid JSON</span>
-              <button type="button" id="prettifyJsonBtnParams" class="btn btn-outline btn-xs">✨ Prettify JSON</button>
+              <button type="button" id="prettifyJsonBtnParams" class="btn btn-outline btn-xs">Format JSON</button>
             </div>
           </div>
           <div class="editor-wrapper">
@@ -431,7 +431,7 @@ const BASE_URL = Platform.select({
             <label for="reqOverrideBody">Request Body Override (JSON)</label>
             <div class="editor-tools">
               <span id="jsonValidationMsgReq" class="validation-msg">Valid JSON</span>
-              <button type="button" id="prettifyJsonBtnReq" class="btn btn-outline btn-xs">✨ Prettify JSON</button>
+              <button type="button" id="prettifyJsonBtnReq" class="btn btn-outline btn-xs">Format JSON</button>
             </div>
           </div>
           <div class="editor-wrapper">

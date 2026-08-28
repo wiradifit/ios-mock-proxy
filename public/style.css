@@ -8,16 +8,16 @@
  * ----------------------------------------------------------------------------------
  */
 :root {
-  --bg-primary: #0f141c;
-  --bg-secondary: #161d28;
-  --bg-tertiary: #1e2838;
-  --bg-hover: #263347;
-  --bg-card: #18202d;
+  --bg-primary: #090d16;
+  --bg-secondary: #0f172a;
+  --bg-tertiary: #1e293b;
+  --bg-hover: #273548;
+  --bg-card: #131d2e;
   
-  --border-color: #2b384e;
-  --border-subtle: #1e293b;
+  --border-color: #243247;
+  --border-subtle: #192333;
   
-  --text-primary: #f1f5f9;
+  --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   
@@ -27,10 +27,9 @@
   --accent-warning: #f59e0b;
   --accent-danger: #ef4444;
   --accent-purple: #8b5cf6;
-  --accent-cyan: #06b6d4;
   
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
 }
 
 * {
@@ -48,17 +47,18 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Header */
 .app-header {
-  height: 56px;
+  height: 52px;
   background-color: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 16px;
   flex-shrink: 0;
 }
 
@@ -75,14 +75,15 @@ body {
 }
 
 .logo-icon {
-  font-size: 20px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  width: 32px;
-  height: 32px;
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  color: #60a5fa;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .logo-text {
@@ -92,19 +93,19 @@ body {
 }
 
 .logo-text .brand {
-  font-weight: 700;
-  font-size: 16px;
-  letter-spacing: -0.3px;
-  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: -0.2px;
+  color: #f8fafc;
 }
 
 .badge-dev {
   font-size: 11px;
-  font-weight: 600;
-  background-color: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  padding: 2px 6px;
+  font-weight: 500;
+  background-color: rgba(59, 130, 246, 0.12);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  padding: 1px 6px;
   border-radius: 4px;
 }
 
@@ -113,31 +114,25 @@ body {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: var(--accent-success);
-  background-color: rgba(16, 185, 129, 0.1);
+  font-weight: 500;
+  color: var(--text-secondary);
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
   padding: 3px 8px;
-  border-radius: 12px;
+  border-radius: 4px;
 }
 
 .status-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   background-color: var(--accent-success);
   border-radius: 50%;
   display: inline-block;
-  box-shadow: 0 0 8px var(--accent-success);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
 }
 
 .header-center {
   flex: 1;
-  max-width: 500px;
+  max-width: 480px;
   margin: 0 20px;
 }
 
@@ -665,8 +660,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -676,13 +670,13 @@ body {
 .modal-card {
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 8px;
   width: 92%;
   max-width: 840px;
   max-height: 92vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
   overflow: hidden;
 }
 
@@ -922,11 +916,11 @@ input:checked + .slider:before {
 }
 
 .slider.round {
-  border-radius: 24px;
+  border-radius: 12px;
 }
 
 .slider.round:before {
-  border-radius: 50%;
+  border-radius: 10px;
 }
 
 .switch-label {

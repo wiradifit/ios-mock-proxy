@@ -1,6 +1,6 @@
-# ⚡ ios-mock-proxy (LocalMockAPI)
+# ios-mock-proxy
 
-> **Zero-Sudo, Zero-Certificate Local API Mock & Reverse Proxy Server with a Live Web GUI Dashboard for iOS, Mobile, and Web Engineers.**
+> **Zero-sudo local API mocking and reverse proxy engine with a real-time web dashboard for iOS, mobile, and web engineers.**
 
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-0%20(Zero)-blue.svg)]()
@@ -9,19 +9,19 @@
 
 ---
 
-## 🎯 Why This Project Exists
+## Overview
 
-Mocking API responses for **iOS Simulator** and **Xcode** has always been notoriously painful:
-- ❌ **Root/Sudo Blockers**: Most traditional proxies (Charles, Proxyman, Mitmproxy) require system-level helper tools and `sudo` access, which are blocked on corporate-managed MacBooks.
-- ❌ **SSL Certificate Hassle**: Installing and trusting custom root CA certificates inside the iOS Simulator trust store frequently breaks with App Transport Security (ATS) and VPN tunnels.
-- ❌ **Xcode Limitations**: Xcode does not provide a native, lightweight visual API interceptor and mock server that just works out of the box.
+Mocking API responses during iOS Simulator and mobile client development is often hindered by friction:
+- **Root and Sudo Requirements**: Traditional proxies (Charles, Proxyman, Mitmproxy) require system helper tools and `sudo` access, which are blocked on corporate-managed machines.
+- **SSL Certificate Overhead**: Installing and trusting custom root CA certificates inside the iOS Simulator trust store regularly causes issues with App Transport Security (ATS) and VPN tunnels.
+- **Xcode Limitations**: Xcode lacks built-in visual API interception and lightweight local mocking.
 
-### 💡 The Solution: Local Reverse Proxy
-**`ios-mock-proxy`** replaces complicated MITM proxies with a lightweight, user-space reverse proxy running on `http://localhost:8080`. 
-- ✅ **No `sudo` or admin privileges required**.
-- ✅ **No root CA SSL certificate installation needed**.
-- ✅ **Zero npm dependencies** (built 100% with native Node.js core modules).
-- ✅ **Multi-Platform Support**: Works seamlessly with **iOS Simulator**, **Android Emulator**, **Flutter**, **React Native**, and **Web Frontends**.
+### Architecture: User-Space Reverse Proxy
+`ios-mock-proxy` operates as a user-space reverse proxy on `http://localhost:8080`:
+- **No `sudo` or admin privileges required**.
+- **No root CA SSL certificate installation**.
+- **Zero npm dependencies** (built entirely with native Node.js core modules).
+- **Multi-Platform Support**: Built for **iOS Simulator**, **Android Emulator**, **Flutter**, **React Native**, and **Web Frontends**.
 
 ```
 +---------------------------------------------------------------------------------------------------+
@@ -59,43 +59,43 @@ Mocking API responses for **iOS Simulator** and **Xcode** has always been notori
 
 ---
 
-## ✨ Key Features
+## Core Features
 
-- 🛡️ **Zero-Sudo & User-Space Operation**: Runs entirely as a standard user process on your Mac. Doesn't touch your network settings or system certificates.
-- ⚡ **Zero External Dependencies**: Powered entirely by native Node.js libraries (`http`, `https`, `url`, `zlib`, `crypto`, `fs`). Instant startup with no `node_modules` clutter.
-- 📊 **Real-Time Live Traffic Inspector**: Streams incoming requests, query parameters, request bodies, response headers, status codes, and execution duration in real time via Server-Sent Events (SSE).
-- 🔍 **Deep Universal Search**: Filter instantly across endpoints, HTTP verbs, status codes, query strings, headers, and request/response JSON payloads.
-- 🎭 **Dual Mock & Rewrite Capabilities**:
-  - **Mock Response**: Return mocked JSON responses with custom HTTP status codes (`200 OK`, `400 Bad Request`, `401 Unauthorized`, `404 Not Found`, `422 Unprocessable`, `500 Internal Error`, etc.) and configurable network latency/delays.
-  - **Modify Request (Proxy Mutation)**: Intercept outgoing requests, mutate their URL query parameters or request body on the fly, and forward the altered request to your remote backend.
-- 📝 **CodeMirror JSON Editor**: Includes line numbers, brace folding ribbon, active line highlight, and one-click JSON formatting.
-- 🔄 **One-Click Rule Creation**: Turn any recorded network call from the live traffic pane into a permanent or temporary mock rule with one click.
-- 🌐 **Seamless Upstream Fallback**: Any unmocked route is transparently proxied to your remote staging or production backend.
+- **Zero-Sudo Operation**: Runs entirely as a standard user process on your Mac without modifying network interfaces or certificate trust stores.
+- **Zero External Dependencies**: Built strictly on Node.js core libraries (`http`, `https`, `url`, `zlib`, `crypto`, `fs`).
+- **Real-Time Traffic Inspector**: Streams incoming requests, query parameters, request bodies, response headers, and timings via Server-Sent Events (SSE).
+- **Deep Search & Filtering**: Search across endpoint paths, HTTP verbs, status codes, query strings, headers, and request/response JSON payloads.
+- **Dual Mock & Rewrite Capabilities**:
+  - **Mock Response**: Return custom JSON payloads with simulated HTTP status codes (`200`, `400`, `401`, `404`, `422`, `500`) and configurable network latency.
+  - **Modify Request (Proxy Mutation)**: Intercept outgoing requests, mutate query parameters or request body, and forward the modified payload to upstream.
+- **Integrated CodeMirror Editor**: In-browser JSON editor with line numbers, code folding, active line highlight, and formatting.
+- **One-Click Rule Creation**: Convert any recorded network call from the live traffic pane directly into a mock rule.
+- **Upstream Fallback**: Unmatched routes are proxied to the configured upstream staging or production backend.
 
 ---
 
-## 📸 Visual Demo & Screenshots
+## Visual Preview
 
-### 1. Live Traffic Inspector & Deep Search
-Stream live network requests from your iOS Simulator, inspect headers, query parameters, request bodies, and mock status in real time:
+### 1. Live Traffic Inspector
+Inspect incoming requests, headers, query parameters, request bodies, and mock status in real time:
 
 ![Live Traffic Inspector](assets/screenshots/dashboard_live_traffic.png)
 
 ---
 
-### 2. CodeMirror Mock Rule Editor with Ribbon
-Create or edit mock responses effortlessly with line numbers, syntax highlighting, active line highlight, and brace folding:
+### 2. Mock Rule Editor
+Create or edit mock responses with syntax highlighting, line numbers, and JSON folding:
 
 ![Mock Rule Editor](assets/screenshots/create_mock_rule.png)
 
 ---
 
-## 🎬 3-Step Demo: How to Mock an API in 30 Seconds
+## Quickstart Tutorial: Mocking an API in 3 Steps
 
 ### Step 1: Define Your Mock Rule in Dashboard
-1. Open `http://localhost:8080/_admin/` and click **＋ Create Mock Rule**.
+1. Open `http://localhost:8080/_admin/` and click **+ New Rule**.
 2. Set Endpoint Path to `/api/v2/pokemon/pikachu` and Status Code to `200 OK`.
-3. Paste your desired JSON payload in the CodeMirror editor:
+3. Enter your JSON payload:
    ```json
    {
      "id": 25,
@@ -155,7 +155,7 @@ Access-Control-Allow-Origin: *
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Component | Technology | Description |
 | :--- | :--- | :--- |
@@ -167,7 +167,7 @@ Access-Control-Allow-Origin: *
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Clone & Run
 
@@ -185,13 +185,13 @@ Navigate to:
 
 👉 **[http://localhost:8080/_admin/](http://localhost:8080/_admin/)**
 
-In the top bar, enter your remote staging URL (e.g. `https://api-staging.example.com`) and click **Save**.
+In the top bar, enter your remote staging URL (e.g. `https://pokeapi.co`) and click **Save**.
 
 ---
 
-## 📱 Multi-Platform Integration Guides
+## Multi-Platform Integration Guides
 
-### 🍎 iOS (Swift, SwiftUI, UIKit, Alamofire, Moya)
+### iOS (Swift, SwiftUI, UIKit, Alamofire, Moya)
 
 Because the iOS Simulator runs on your Mac's network loopback, you can connect directly to `localhost`:
 
@@ -222,7 +222,7 @@ struct APIConfig {
 
 ---
 
-### 🤖 Android (Kotlin, Java, Retrofit, OkHttp)
+### Android (Kotlin, Java, Retrofit, OkHttp)
 
 Android Emulators access the host machine's `localhost` via the special IP `10.0.2.2`:
 
@@ -237,7 +237,7 @@ val baseUrl = if (BuildConfig.DEBUG) {
 
 ---
 
-### 💙 Flutter & ⚛️ React Native
+### Flutter & React Native
 
 ```dart
 // Flutter (Dart) Example
@@ -265,7 +265,7 @@ const BASE_URL = Platform.select({
 
 ---
 
-### 💻 Web & Single-Page Apps (React, Vue, Vite, Next.js, Axios)
+### Web & Single-Page Apps (React, Vue, Vite, Next.js, Axios)
 
 Set your `.env.development` or Axios base URL:
 
@@ -275,7 +275,7 @@ VITE_API_BASE_URL=http://localhost:8080/api
 
 ---
 
-## 🎯 Mocking & Request Mutation Rules
+## Mocking & Request Mutation Rules
 
 ### 1. Mock Response Mode
 Simulate responses without touching the backend:
@@ -295,7 +295,7 @@ Intercept and mutate incoming requests before they hit the upstream backend:
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 ios-mock-proxy/
@@ -314,7 +314,7 @@ ios-mock-proxy/
 
 ---
 
-## 🔌 REST Admin API Reference
+## REST Admin API Reference
 
 The dashboard interacts with `ios-mock-proxy` via internal REST endpoints:
 
@@ -332,7 +332,7 @@ The dashboard interacts with `ios-mock-proxy` via internal REST endpoints:
 
 ---
 
-## 🔒 Security Architecture & Network Safety
+## Security Architecture & Network Safety
 
 `ios-mock-proxy` is engineered with defense-in-depth measures to ensure safe local network interception:
 
@@ -366,11 +366,11 @@ The dashboard interacts with `ios-mock-proxy` via internal REST endpoints:
   HOST=127.0.0.1 ./start.sh
   ```
 
-> ⚠️ **Development Use Only Notice:** `ios-mock-proxy` is intended exclusively for local development, staging verification, and automated testing. It should never be exposed as an unauthenticated gateway to the public internet.
+> **Development Use Only Notice:** `ios-mock-proxy` is intended exclusively for local development, staging verification, and automated testing. It should never be exposed as an unauthenticated gateway to the public internet.
 
 ---
 
-## ❓ FAQ & Troubleshooting
+## FAQ & Troubleshooting
 
 ### Port 8080 is in use
 Pass a custom port when starting:
@@ -379,16 +379,16 @@ PORT=8888 ./start.sh
 ```
 
 ### Self-Signed Upstream Staging Certificates
-`ios-mock-proxy` sets `rejectUnauthorized: false` automatically, allowing seamless proxying to private staging servers with self-signed SSL certificates.
+`ios-mock-proxy` sets `rejectUnauthorized: false` automatically, allowing proxying to private staging servers with self-signed SSL certificates.
 
 ---
 
-## 📄 License & Legal Notice
+## License & Legal Notice
 
 This project is licensed under a **Custom Non-Commercial Software License Agreement**:
-- ✅ **Free for Personal, Educational, and Research Use**: You are free to run, modify, and test this project for personal, hobbyist, and non-commercial development.
-- ⛔ **Commercial Use & Commercialization Strictly Prohibited**: Any unauthorized commercial use, commercial distribution, sublicensing, SaaS hosting for revenue, or incorporation into commercial products is strictly prohibited without prior explicit written license from **Prawira Hadi Fitrajaya**.
-- ⚖️ **Legal Enforcement**: This software is protected by international treaties (Berne Convention, WIPO Copyright Treaty, TRIPS, DMCA) and national statutory copyright legislation (UU No. 28/2014 tentang Hak Cipta). Unauthorized commercialization constitutes willful infringement and will be prosecuted under civil and criminal legal jurisdictions.
+- **Free for Personal, Educational, and Research Use**: You are free to run, modify, and test this project for personal, hobbyist, and non-commercial development.
+- **Commercial Use & Commercialization Strictly Prohibited**: Any unauthorized commercial use, commercial distribution, sublicensing, SaaS hosting for revenue, or incorporation into commercial products is strictly prohibited without prior explicit written license from **Prawira Hadi Fitrajaya**.
+- **Legal Enforcement**: This software is protected by international treaties (Berne Convention, WIPO Copyright Treaty, TRIPS, DMCA) and national statutory copyright legislation (UU No. 28/2014 tentang Hak Cipta). Unauthorized commercialization constitutes willful infringement and will be prosecuted under civil and criminal legal jurisdictions.
 
 For commercial licensing and permissions, contact: `fttrajayaprawira@gmail.com`.
 
@@ -396,9 +396,9 @@ See the full [LICENSE](LICENSE) file for complete legal terms.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions, bug fixes, UI improvements, and feature proposals from the developer community are warmly welcome!
+Contributions, bug fixes, UI improvements, and feature proposals from the developer community are welcome.
 
 ### How to Contribute
 1. **Fork the Repository**: Click the **Fork** button at the top right of the GitHub repo.
@@ -417,12 +417,12 @@ Contributions, bug fixes, UI improvements, and feature proposals from the develo
    ```
 6. **Submit a Pull Request (PR)**: Open a PR targeting the `main` branch.
 
-> 🛡️ **Branch Protection & Review Notice:**  
-> The `main` branch is protected with strict branch policies. Direct commits are restricted, and all Pull Requests must be reviewed and approved exclusively by the author and repository maintainer (**Prawira Hadi Fitrajaya** / `fitrajayaprawira@gmail.com`).
+> **Branch Protection & Review Notice:**  
+> The `main` branch is protected with branch policies. Direct commits are restricted, and all Pull Requests must be reviewed and approved by the author and repository maintainer (**Prawira Hadi Fitrajaya** / `fitrajayaprawira@gmail.com`).
 
 ---
 
-## 👨‍💻 Author & Maintainer
+## Author & Maintainer
 
 **Prawira Hadi Fitrajaya** ([@wiradifit](https://github.com/wiradifit))  
 Email: `fttrajayaprawira@gmail.com`

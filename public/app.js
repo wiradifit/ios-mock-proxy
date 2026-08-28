@@ -459,9 +459,9 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
 
           <div class="rule-card-actions">
-            <button class="btn btn-outline btn-xs edit-rule-btn" data-id="${rule.id}">✏️ Edit</button>
-            <button class="btn btn-outline btn-xs duplicate-rule-btn" data-id="${rule.id}">📋 Duplicate</button>
-            <button class="btn btn-danger-outline btn-xs delete-rule-btn" data-id="${rule.id}">🗑️ Delete</button>
+            <button class="btn btn-outline btn-xs edit-rule-btn" data-id="${rule.id}">Edit</button>
+            <button class="btn btn-outline btn-xs duplicate-rule-btn" data-id="${rule.id}">Duplicate</button>
+            <button class="btn btn-danger-outline btn-xs delete-rule-btn" data-id="${rule.id}">Delete</button>
           </div>
         </div>
       `;
@@ -857,7 +857,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const rows = Array.from(document.querySelectorAll('.traffic-row'));
       const targetRow = rows.find(r => r.textContent.includes('/api/v2/pokemon/pikachu')) || rows[0];
       if (targetRow) targetRow.click();
-    }, 500);
+    }, 1200);
   } else if (urlParams.get('demo') === 'modal') {
     setTimeout(() => {
       openRuleModalForCreate({
