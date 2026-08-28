@@ -183,7 +183,7 @@ cd ios-mock-proxy
 
 Navigate to:
 
-👉 **[http://localhost:8080/_admin/](http://localhost:8080/_admin/)**
+[http://localhost:8080/_admin/](http://localhost:8080/_admin/)
 
 In the top bar, enter your remote staging URL (e.g. `https://pokeapi.co`) and click **Save**.
 

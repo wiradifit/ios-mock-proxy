@@ -730,10 +730,9 @@ const server = http.createServer(async (req, res) => {
 const PORT = process.env.PORT || config.port || 8080;
 const HOST = process.env.HOST || '0.0.0.0';
 server.listen(PORT, HOST, () => {
-  console.log('====================================================');
-  console.log(`  🚀 ios-mock-proxy Server is running on ${HOST}:${PORT}!`);
-  console.log(`  📊 Web Dashboard:  http://localhost:${PORT}/_admin/`);
-  console.log(`  🌐 Proxy / Mock:    http://localhost:${PORT}/`);
-  console.log(`  📡 Upstream Target: ${config.upstream || '(None configured)'}`);
-  console.log('====================================================');
+  console.log('----------------------------------------------------');
+  console.log(`  ios-mock-proxy running on http://${HOST}:${PORT}`);
+  console.log(`  Dashboard:       http://localhost:${PORT}/_admin/`);
+  console.log(`  Upstream Target: ${config.upstream || '(None configured)'}`);
+  console.log('----------------------------------------------------');
 });

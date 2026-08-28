@@ -273,9 +273,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (filtered.length === 0) {
       trafficList.innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">📡</div>
-          <p>${traffic.length === 0 ? 'No traffic recorded yet' : 'No requests matching search'}</p>
-          <span class="empty-hint">Try adjusting your search keywords or method filters.</span>
+          <p>${traffic.length === 0 ? 'No traffic recorded yet' : 'No requests matching filter'}</p>
+          <span class="empty-hint">Requests matching your criteria will appear here in real time.</span>
         </div>
       `;
       return;
@@ -424,9 +423,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (filtered.length === 0) {
       rulesGrid.innerHTML = `
         <div class="empty-state" style="grid-column: 1 / -1;">
-          <div class="empty-icon">📋</div>
           <p>${rules.length === 0 ? 'No mock rules created yet' : 'No rules match search'}</p>
-          <button class="btn btn-primary" onclick="document.getElementById('newRuleBtn').click()">＋ Create Your First Mock Rule</button>
+          <button class="btn btn-primary" onclick="document.getElementById('newRuleBtn').click()">+ New Rule</button>
         </div>
       `;
       return;
