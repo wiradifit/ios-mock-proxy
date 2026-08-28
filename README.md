@@ -5,7 +5,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-0%20(Zero)-blue.svg)]()
 [![Platform](https://img.shields.io/badge/Platform-iOS%20%7C%20Android%20%7C%20Flutter%20%7C%20React%20Native%20%7C%20Web-orange.svg)]()
-[![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Non--Commercial-red.svg)](LICENSE)
 
 ---
 
@@ -365,7 +365,13 @@ PORT=8888 ./start.sh
 
 ## 📄 License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under a **Custom Non-Commercial Software License Agreement**:
+- ✅ **Free for Personal, Educational, and Research Use**: You are free to run, modify, and test this project for personal and non-commercial development.
+- ⛔ **Commercial Use Restriction**: Any commercial exploitation, redistribution for profit, sublicensing, or integration into commercial products/services is strictly prohibited without prior written permission from the copyright holder.
+
+For commercial licensing and permissions, contact: `fttrajayaprawira@gmail.com`.
+
+See the full [LICENSE](LICENSE) file for legal terms.
 
 ---
 
