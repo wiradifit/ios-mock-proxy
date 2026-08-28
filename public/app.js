@@ -137,6 +137,16 @@ document.addEventListener('DOMContentLoaded', () => {
       traffic = await res.json();
       trafficCountBadge.textContent = traffic.length;
       renderTraffic();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('demo') === 'inspect' && traffic.length > 0) {
+        const pikachuItem = traffic.find(t => (t.path || '').includes('/api/v2/pokemon/pikachu')) || traffic[0];
+        if (pikachuItem) {
+          inspectTraffic(pikachuItem);
+          selectedTrafficId = pikachuItem.id;
+          renderTraffic();
+        }
+      }
     } catch (e) {
       console.error('Failed to fetch traffic', e);
     }
@@ -594,21 +604,31 @@ document.addEventListener('DOMContentLoaded', () => {
     ruleStatusCodeSelect.value = prefill.statusCode || '200';
     ruleDelayInput.value = prefill.delay || '0';
     
-    setEditorValue(cmEditorResp, ruleBodyTextarea, prefill.body || '{\n  "status": "success",\n  "data": {}\n}');
-    setEditorValue(cmEditorParams, reqOverrideParamsTextarea, prefill.reqOverrideParams || '');
-    setEditorValue(cmEditorReqBody, reqOverrideBodyTextarea, prefill.reqOverrideBody || '');
-    
-    validateJsonInput(cmEditorResp, ruleBodyTextarea, jsonValidationMsgResp);
-    validateJsonInput(cmEditorParams, reqOverrideParamsTextarea, jsonValidationMsgParams, true);
-    validateJsonInput(cmEditorReqBody, reqOverrideBodyTextarea, jsonValidationMsgReq, true);
-    
+    ruleBodyTextarea.value = prefill.body || '{\n  "status": "success",\n  "data": {}\n}';
+    reqOverrideParamsTextarea.value = prefill.reqOverrideParams || '';
+    reqOverrideBodyTextarea.value = prefill.reqOverrideBody || '';
+
     syncActionVisibility();
     ruleModal.style.display = 'flex';
-    setTimeout(() => {
-      if (cmEditorResp) cmEditorResp.refresh();
-      if (cmEditorParams) cmEditorParams.refresh();
-      if (cmEditorReqBody) cmEditorReqBody.refresh();
-    }, 80);
+
+    if (cmEditorResp) {
+      cmEditorResp.setValue(ruleBodyTextarea.value);
+      cmEditorResp.refresh();
+      validateJsonInput(cmEditorResp, ruleBodyTextarea, jsonValidationMsgResp);
+      setTimeout(() => cmEditorResp.refresh(), 50);
+    }
+    if (cmEditorParams) {
+      cmEditorParams.setValue(reqOverrideParamsTextarea.value);
+      cmEditorParams.refresh();
+      validateJsonInput(cmEditorParams, reqOverrideParamsTextarea, jsonValidationMsgParams, true);
+      setTimeout(() => cmEditorParams.refresh(), 50);
+    }
+    if (cmEditorReqBody) {
+      cmEditorReqBody.setValue(reqOverrideBodyTextarea.value);
+      cmEditorReqBody.refresh();
+      validateJsonInput(cmEditorReqBody, reqOverrideBodyTextarea, jsonValidationMsgReq, true);
+      setTimeout(() => cmEditorReqBody.refresh(), 50);
+    }
   }
 
   function openRuleModalForEdit(rule) {
@@ -622,32 +642,45 @@ document.addEventListener('DOMContentLoaded', () => {
     ruleMethodSelect.value = rule.method || 'GET';
     ruleMatchTypeSelect.value = rule.matchType || 'exact';
     rulePathInput.value = rule.path || '';
-    ruleStatusCodeSelect.value = rule.statusCode || '200';
+    ruleStatusCodeSelect.value = String(rule.statusCode || 200);
     ruleDelayInput.value = rule.delay || '0';
     
     let bodyStr = rule.body;
     if (typeof bodyStr !== 'string') bodyStr = JSON.stringify(bodyStr, null, 2);
-    setEditorValue(cmEditorResp, ruleBodyTextarea, bodyStr || '');
+    ruleBodyTextarea.value = bodyStr || '';
 
     let paramsStr = rule.reqOverrideParams;
     if (typeof paramsStr !== 'string' && paramsStr) paramsStr = JSON.stringify(paramsStr, null, 2);
-    setEditorValue(cmEditorParams, reqOverrideParamsTextarea, paramsStr || '');
+    reqOverrideParamsTextarea.value = paramsStr || '';
 
     let reqBodyStr = rule.reqOverrideBody;
     if (typeof reqBodyStr !== 'string' && reqBodyStr) reqBodyStr = JSON.stringify(reqBodyStr, null, 2);
-    setEditorValue(cmEditorReqBody, reqOverrideBodyTextarea, reqBodyStr || '');
+    reqOverrideBodyTextarea.value = reqBodyStr || '';
 
-    validateJsonInput(cmEditorResp, ruleBodyTextarea, jsonValidationMsgResp);
-    validateJsonInput(cmEditorParams, reqOverrideParamsTextarea, jsonValidationMsgParams, true);
-    validateJsonInput(cmEditorReqBody, reqOverrideBodyTextarea, jsonValidationMsgReq, true);
-    
     syncActionVisibility();
     ruleModal.style.display = 'flex';
-    setTimeout(() => {
-      if (cmEditorResp) cmEditorResp.refresh();
-      if (cmEditorParams) cmEditorParams.refresh();
-      if (cmEditorReqBody) cmEditorReqBody.refresh();
-    }, 80);
+
+    if (cmEditorResp) {
+      cmEditorResp.setValue(ruleBodyTextarea.value);
+      setTimeout(() => {
+        cmEditorResp.refresh();
+        validateJsonInput(cmEditorResp, ruleBodyTextarea, jsonValidationMsgResp);
+      }, 50);
+    }
+    if (cmEditorParams) {
+      cmEditorParams.setValue(reqOverrideParamsTextarea.value);
+      setTimeout(() => {
+        cmEditorParams.refresh();
+        validateJsonInput(cmEditorParams, reqOverrideParamsTextarea, jsonValidationMsgParams, true);
+      }, 50);
+    }
+    if (cmEditorReqBody) {
+      cmEditorReqBody.setValue(reqOverrideBodyTextarea.value);
+      setTimeout(() => {
+        cmEditorReqBody.refresh();
+        validateJsonInput(cmEditorReqBody, reqOverrideBodyTextarea, jsonValidationMsgReq, true);
+      }, 50);
+    }
   }
 
   function closeRuleModal() {
@@ -857,34 +890,32 @@ document.addEventListener('DOMContentLoaded', () => {
       if (targetRow) targetRow.click();
     }, 1200);
   } else if (urlParams.get('demo') === 'modal') {
-    setTimeout(() => {
-      openRuleModalForCreate({
-        name: 'Mock Pikachu Stats (PokéAPI)',
-        method: 'GET',
-        path: '/api/v2/pokemon/pikachu',
-        statusCode: 200,
-        delay: 120,
-        body: JSON.stringify({
-          id: 25,
-          name: "pikachu",
-          base_experience: 112,
-          height: 4,
-          weight: 60,
-          is_default: true,
-          types: [
-            { slot: 1, type: { name: "electric" } }
-          ],
-          abilities: [
-            { ability: { name: "static" }, is_hidden: false },
-            { ability: { name: "lightning-rod" }, is_hidden: true }
-          ],
-          stats: [
-            { base_stat: 35, stat: { name: "hp" } },
-            { base_stat: 55, stat: { name: "attack" } },
-            { base_stat: 90, stat: { name: "speed" } }
-          ]
-        }, null, 2)
-      });
-    }, 500);
+    openRuleModalForCreate({
+      name: 'Mock Pikachu Stats (PokéAPI)',
+      method: 'GET',
+      path: '/api/v2/pokemon/pikachu',
+      statusCode: 200,
+      delay: 120,
+      body: JSON.stringify({
+        id: 25,
+        name: "pikachu",
+        base_experience: 112,
+        height: 4,
+        weight: 60,
+        is_default: true,
+        types: [
+          { slot: 1, type: { name: "electric" } }
+        ],
+        abilities: [
+          { ability: { name: "static" }, is_hidden: false },
+          { ability: { name: "lightning-rod" }, is_hidden: true }
+        ],
+        stats: [
+          { base_stat: 35, stat: { name: "hp" } },
+          { base_stat: 55, stat: { name: "attack" } },
+          { base_stat: 90, stat: { name: "speed" } }
+        ]
+      }, null, 2)
+    });
   }
 });
