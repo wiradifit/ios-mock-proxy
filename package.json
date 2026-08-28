@@ -1,0 +1,29 @@
+{
+  "name": "ios-mock-proxy",
+  "version": "1.0.0",
+  "description": "Zero-config, zero-sudo local mock and reverse proxy server with web GUI for iOS, Android, and Web developers",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "ios-mock",
+    "ios-proxy",
+    "xcode",
+    "simulator-mock",
+    "mock-api",
+    "reverse-proxy",
+    "network-debugger",
+    "swift-mock",
+    "android-mock",
+    "flutter-mock",
+    "zero-sudo"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wiradifit/ios-mock-proxy.git"
+  },
+  "author": "Prawira Hadi Fitrajaya <fttrajayaprawira@gmail.com>",
+  "license": "MIT"
+}

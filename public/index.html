@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LocalMockAPI - Zero-Sudo iOS Network Mocker & Proxy</title>
+  <link rel="stylesheet" href="/_admin/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- CodeMirror for JSON Editor with Line Numbers & Code Folding Gutter Ribbon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.css">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/brace-fold.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+</head>
+<body>
+  <!-- Header / Navbar -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo">
+        <div class="logo-icon">⚡</div>
+        <div class="logo-text">
+          <span class="brand">LocalMockAPI</span>
+          <span class="badge badge-dev">iOS Mock & Proxy</span>
+        </div>
+      </div>
+      <div class="live-status" id="liveStatus">
+        <span class="status-dot"></span>
+        <span class="status-label">Live Connected</span>
+      </div>
+    </div>
+
+    <!-- Quick Upstream Bar -->
+    <div class="header-center">
+      <div class="upstream-bar">
+        <span class="upstream-label">Upstream Backend:</span>
+        <input type="text" id="quickUpstreamInput" placeholder="https://api.example.com" spellcheck="false" />
+        <button id="saveUpstreamBtn" class="btn btn-secondary btn-sm">Save</button>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="mode-selector">
+        <label for="mockModeSelect">Mode:</label>
+        <select id="mockModeSelect" class="form-select-sm">
+          <option value="fallback">Mock + Upstream Fallback</option>
+          <option value="mock_only">Mock Only (Strict)</option>
+          <option value="passthrough">Passthrough (Direct Upstream)</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-tab="traffic">
+      <span class="tab-icon">📡</span> Live Traffic
+      <span class="tab-badge" id="trafficCountBadge">0</span>
+    </button>
+    <button class="nav-tab" data-tab="rules">
+      <span class="tab-icon">📋</span> Mock Rules
+      <span class="tab-badge" id="rulesCountBadge">0</span>
+    </button>
+    <button class="nav-tab" data-tab="guide">
+      <span class="tab-icon">📱</span> iOS Setup Guide
+    </button>
+  </nav>
+
+  <!-- Main Content Areas -->
+  <main class="main-container">
+
+    <!-- Tab 1: Live Traffic -->
+    <section id="tab-traffic" class="tab-content active">
+      <div class="traffic-toolbar">
+        <div class="toolbar-left">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="trafficFilterInput" placeholder="Search everything (URL, request/response body, headers, status)..." />
+          </div>
+          <div class="filter-group">
+            <select id="trafficMethodFilter" class="form-select-sm">
+              <option value="ALL">All Methods</option>
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="PATCH">PATCH</option>
+              <option value="DELETE">DELETE</option>
+            </select>
+            <select id="trafficTypeFilter" class="form-select-sm">
+              <option value="ALL">All Traffic</option>
+              <option value="MOCK">Mocked Only</option>
+              <option value="PROXY">Proxied Only</option>
+              <option value="ERROR">Errors (4xx, 5xx)</option>
+            </select>
+          </div>
+        </div>
+        <div class="toolbar-right">
+          <button id="clearTrafficBtn" class="btn btn-outline btn-sm">🗑️ Clear Logs</button>
+        </div>
+      </div>
+
+      <div class="split-view">
+        <!-- Traffic List Pane -->
+        <div class="traffic-list-pane">
+          <div class="list-table-header">
+            <div class="col col-status">Status</div>
+            <div class="col col-method">Method</div>
+            <div class="col col-path">Endpoint Path</div>
+            <div class="col col-type">Type</div>
+            <div class="col col-time">Duration</div>
+          </div>
+          <div class="traffic-list" id="trafficList">
+            <div class="empty-state">
+              <div class="empty-icon">📡</div>
+              <p>No traffic recorded yet</p>
+              <span class="empty-hint">Requests from your iOS app or test calls to <code>http://localhost:8080/...</code> will stream here live.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Request Details / Inspector Pane -->
+        <div class="inspector-pane" id="inspectorPane">
+          <div class="inspector-empty" id="inspectorEmpty">
+            <div class="empty-icon">👈</div>
+            <p>Select a request from the list to inspect details</p>
+          </div>
+
+          <div class="inspector-content" id="inspectorContent" style="display: none;">
+            <div class="inspector-header">
+              <div class="inspector-title">
+                <span id="inspMethodBadge" class="method-badge">GET</span>
+                <span id="inspPath" class="insp-path">/api/v1/...</span>
+              </div>
+              <div class="inspector-actions">
+                <button id="convertToMockBtn" class="btn btn-primary btn-sm">⚡ Convert to Mock Rule</button>
+              </div>
+            </div>
+
+            <div class="inspector-meta-bar">
+              <span class="meta-item">Status: <strong id="inspStatusBadge" class="status-pill status-200">200 OK</strong></span>
+              <span class="meta-item">Type: <strong id="inspTypeBadge" class="type-pill type-mock">MOCKED</strong></span>
+              <span class="meta-item">Duration: <strong id="inspDuration">12ms</strong></span>
+              <span class="meta-item">Time: <strong id="inspTime">09:30:00</strong></span>
+            </div>
+
+            <!-- Inspector Sub-tabs -->
+            <div class="inspector-subtabs">
+              <button class="subtab active" data-subtab="resp-body">Response Body</button>
+              <button class="subtab" data-subtab="resp-headers">Response Headers</button>
+              <button class="subtab" data-subtab="req-params">Query Params</button>
+              <button class="subtab" data-subtab="req-body">Request Body</button>
+              <button class="subtab" data-subtab="req-headers">Request Headers</button>
+            </div>
+
+            <div class="inspector-tab-panes">
+              <div class="subtab-pane active" id="subtab-resp-body">
+                <div class="pane-toolbar">
+                  <span class="pane-title">Response JSON Body</span>
+                  <button class="btn-copy" id="copyRespBodyBtn">📋 Copy</button>
+                </div>
+                <pre class="code-view"><code id="inspRespBody"></code></pre>
+              </div>
+
+              <div class="subtab-pane" id="subtab-resp-headers">
+                <pre class="code-view"><code id="inspRespHeaders"></code></pre>
+              </div>
+
+              <div class="subtab-pane" id="subtab-req-params">
+                <pre class="code-view"><code id="inspReqParams"></code></pre>
+              </div>
+
+              <div class="subtab-pane" id="subtab-req-body">
+                <pre class="code-view"><code id="inspReqBody"></code></pre>
+              </div>
+
+              <div class="subtab-pane" id="subtab-req-headers">
+                <pre class="code-view"><code id="inspReqHeaders"></code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 2: Mock Rules -->
+    <section id="tab-rules" class="tab-content">
+      <div class="rules-toolbar">
+        <div class="toolbar-left">
+          <input type="text" id="ruleSearchInput" placeholder="Search mock rules..." />
+        </div>
+        <div class="toolbar-right">
+          <button id="newRuleBtn" class="btn btn-primary">＋ Create Mock Rule</button>
+        </div>
+      </div>
+
+      <div class="rules-grid" id="rulesGrid">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </section>
+
+    <!-- Tab 3: iOS Setup Guide -->
+    <section id="tab-guide" class="tab-content">
+      <div class="guide-container">
+        <h2>📱 iOS Simulator & App Setup Guide</h2>
+        <p class="guide-intro">
+          LocalMockAPI runs on <code>http://localhost:8080</code>. Follow these simple steps to route your iOS app's network calls through it without touching any system settings.
+        </p>
+
+        <div class="guide-card">
+          <div class="guide-step-num">Step 1</div>
+          <div class="guide-step-body">
+            <h3>Set Upstream Backend Target</h3>
+            <p>Enter your real Staging backend URL in the top bar (e.g. <code>https://api-staging.example.com</code>). When an endpoint is not mocked, requests will seamlessly proxy to this staging backend.</p>
+          </div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-step-num">Step 2</div>
+          <div class="guide-step-body">
+            <h3>Update Base URL in your iOS Codebase</h3>
+            <p>In your app's environment configuration (e.g. <code>EnvironmentURL.swift</code> or Debug Scheme settings), set your Base URL to:</p>
+            <div class="code-box">
+              <code>http://localhost:8080</code>
+            </div>
+            <p class="note">💡 <strong>Simulator Tip:</strong> The iOS Simulator runs on your Mac's localhost network. No Wi-Fi proxy or SSL certificates are needed!</p>
+          </div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-step-num">Step 3</div>
+          <div class="guide-step-body">
+            <h3>Quick Verification with Terminal / curl</h3>
+            <p>You can test an endpoint right now from your terminal:</p>
+            <div class="code-box">
+              <code>curl -i http://localhost:8080/api/v1/user/profile</code>
+            </div>
+            <p>You will see the mocked response returned instantly and logged in the <strong>Live Traffic</strong> tab above!</p>
+          </div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-step-num">Step 4</div>
+          <div class="guide-step-body">
+            <h3>Physical Device on Local Wi-Fi (Optional)</h3>
+            <p>If testing on a physical iPhone connected to the same Wi-Fi network as your Mac, find your Mac's local IP address (e.g. <code>192.168.1.50</code>) and set the app's Base URL to <code>http://192.168.1.50:8080</code>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Mock Rule Editor Modal -->
+  <div class="modal-overlay" id="ruleModal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Create Mock Rule</h3>
+        <button class="btn-close" id="closeModalBtn">&times;</button>
+      </div>
+
+      <form id="ruleForm" class="modal-body">
+        <input type="hidden" id="ruleId" />
+
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label for="ruleName">Rule Name / Description</label>
+            <input type="text" id="ruleName" placeholder="e.g. User Profile (Gold Tier)" required />
+          </div>
+          <div class="form-group flex-1">
+            <label for="ruleStatusToggle">Active Status</label>
+            <div class="toggle-switch-wrapper">
+              <label class="switch">
+                <input type="checkbox" id="ruleEnabled" checked>
+                <span class="slider round"></span>
+              </label>
+              <span id="ruleEnabledLabel" class="switch-label">Enabled</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="ruleMethod">HTTP Method</label>
+            <select id="ruleMethod" class="form-select">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="PATCH">PATCH</option>
+              <option value="DELETE">DELETE</option>
+              <option value="ALL">ALL (Any Method)</option>
+            </select>
+          </div>
+          <div class="form-group flex-1">
+            <label for="ruleMatchType">Match Type</label>
+            <select id="ruleMatchType" class="form-select">
+              <option value="exact">Exact Path</option>
+              <option value="prefix">Prefix Match</option>
+              <option value="wildcard">Wildcard (*)</option>
+            </select>
+          </div>
+          <div class="form-group flex-2">
+            <label for="rulePath">Endpoint Path</label>
+            <input type="text" id="rulePath" placeholder="/api/v1/user/profile" required spellcheck="false" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="ruleActionType">Rule Action</label>
+            <select id="ruleActionType" class="form-select">
+              <option value="mock_response">Mock Response</option>
+              <option value="modify_request">Modify Request (Proxy)</option>
+            </select>
+          </div>
+          <div class="form-group flex-1" id="statusCodeGroup">
+            <label for="ruleStatusCode">HTTP Status Code</label>
+            <select id="ruleStatusCode" class="form-select">
+              <option value="200">200 OK</option>
+              <option value="201">201 Created</option>
+              <option value="204">204 No Content</option>
+              <option value="400">400 Bad Request</option>
+              <option value="401">401 Unauthorized</option>
+              <option value="403">403 Forbidden</option>
+              <option value="404">404 Not Found</option>
+              <option value="422">422 Unprocessable Entity</option>
+              <option value="500">500 Internal Server Error</option>
+              <option value="502">502 Bad Gateway</option>
+              <option value="503">503 Service Unavailable</option>
+            </select>
+          </div>
+          <div class="form-group flex-1">
+            <label for="ruleDelay">Simulated Delay (ms)</label>
+            <input type="number" id="ruleDelay" value="0" min="0" max="30000" step="50" placeholder="0" />
+          </div>
+        </div>
+
+        <div class="form-group" id="editorGroupRespBody">
+          <div class="editor-header">
+            <label for="ruleBody">Response Body (JSON)</label>
+            <div class="editor-tools">
+              <span id="jsonValidationMsgResp" class="validation-msg">Valid JSON</span>
+              <button type="button" id="prettifyJsonBtnResp" class="btn btn-outline btn-xs">✨ Prettify JSON</button>
+            </div>
+          </div>
+          <div class="editor-wrapper">
+            <textarea id="ruleBody" rows="12" class="code-textarea" spellcheck="false" placeholder="{\n  &quot;status&quot;: &quot;success&quot;,\n  &quot;data&quot;: {}\n}"></textarea>
+          </div>
+        </div>
+
+        <div class="form-group" id="editorGroupReqParams" style="display: none;">
+          <div class="editor-header">
+            <label for="reqOverrideParams">URL Query Params Override (JSON)</label>
+            <div class="editor-tools">
+              <span id="jsonValidationMsgParams" class="validation-msg">Valid JSON</span>
+              <button type="button" id="prettifyJsonBtnParams" class="btn btn-outline btn-xs">✨ Prettify JSON</button>
+            </div>
+          </div>
+          <div class="editor-wrapper">
+            <textarea id="reqOverrideParams" rows="5" class="code-textarea" spellcheck="false" placeholder="{\n  &quot;page&quot;: &quot;1&quot;,\n  &quot;limit&quot;: &quot;100&quot;\n}"></textarea>
+          </div>
+          <small class="form-help">Merges with existing query parameters. Use null to remove a parameter.</small>
+        </div>
+
+        <div class="form-group" id="editorGroupReqBody" style="display: none;">
+          <div class="editor-header">
+            <label for="reqOverrideBody">Request Body Override (JSON)</label>
+            <div class="editor-tools">
+              <span id="jsonValidationMsgReq" class="validation-msg">Valid JSON</span>
+              <button type="button" id="prettifyJsonBtnReq" class="btn btn-outline btn-xs">✨ Prettify JSON</button>
+            </div>
+          </div>
+          <div class="editor-wrapper">
+            <textarea id="reqOverrideBody" rows="7" class="code-textarea" spellcheck="false" placeholder="{\n  &quot;username&quot;: &quot;hacked_user&quot;\n}"></textarea>
+          </div>
+          <small class="form-help">Replaces the entire request body before proxying to upstream.</small>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="cancelRuleBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveRuleBtn">Save Mock Rule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <script src="/_admin/app.js"></script>
+</body>
+</html>

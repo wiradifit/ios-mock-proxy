@@ -1,0 +1,30 @@
+[
+  {
+    "id": "rule_sample_1",
+    "name": "Sample User Profile",
+    "enabled": false,
+    "method": "GET",
+    "path": "/api/v1/user/profile",
+    "matchType": "exact",
+    "statusCode": 200,
+    "delay": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"id\": \"usr_12345\",\n    \"name\": \"John Doe (Mocked)\",\n    \"email\": \"john.doe@example.com\",\n    \"balance\": 250000000,\n    \"tier\": \"Platinum\"\n  }\n}"
+  },
+  {
+    "id": "rule_sample_2",
+    "name": "Sample Error 400 Test",
+    "enabled": false,
+    "method": "POST",
+    "path": "/api/v1/orders",
+    "matchType": "exact",
+    "statusCode": 400,
+    "delay": 500,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\n  \"status\": \"error\",\n  \"error_code\": \"INSUFFICIENT_FUNDS\",\n  \"message\": \"Your buying power is insufficient for this order.\"\n}"
+  }
+]
