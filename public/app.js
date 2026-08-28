@@ -809,4 +809,35 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchRules();
   fetchTraffic();
   initSSE();
+
+  // Automated demo handler for visual documentation & screenshots
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('demo') === 'inspect') {
+    setTimeout(() => {
+      const rows = Array.from(document.querySelectorAll('.traffic-row'));
+      const targetRow = rows.find(r => r.textContent.includes('/api/v1/user/profile')) || rows[0];
+      if (targetRow) targetRow.click();
+    }, 500);
+  } else if (urlParams.get('demo') === 'modal') {
+    setTimeout(() => {
+      openRuleModalForCreate({
+        name: 'Mock User Profile (VIP Tier)',
+        method: 'GET',
+        path: '/api/v1/user/profile',
+        statusCode: 200,
+        delay: 200,
+        body: JSON.stringify({
+          status: 'success',
+          data: {
+            id: 'usr_99812',
+            name: 'Alex Johnson',
+            email: 'alex.johnson@example.com',
+            tier: 'Diamond VIP',
+            balance_usd: 145250.00,
+            features: ['instant_transfer', 'zero_fee_trading', 'analytics_pro']
+          }
+        }, null, 2)
+      });
+    }, 500);
+  }
 });

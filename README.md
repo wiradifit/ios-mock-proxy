@@ -74,6 +74,67 @@ Mocking API responses for **iOS Simulator** and **Xcode** has always been notori
 
 ---
 
+## 📸 Visual Demo & Screenshots
+
+### 1. Live Traffic Inspector & Deep Search
+Stream live network requests from your iOS Simulator, inspect headers, query parameters, request bodies, and mock status in real time:
+
+![Live Traffic Inspector](assets/screenshots/dashboard_live_traffic.png)
+
+---
+
+### 2. CodeMirror Mock Rule Editor with Ribbon
+Create or edit mock responses effortlessly with line numbers, syntax highlighting, active line highlight, and brace folding:
+
+![Mock Rule Editor](assets/screenshots/create_mock_rule.png)
+
+---
+
+## 🎬 3-Step Demo: How to Mock an API in 30 Seconds
+
+### Step 1: Define Your Mock Rule in Dashboard
+1. Open `http://localhost:8080/_admin/` and click **＋ Create Mock Rule**.
+2. Set Endpoint Path to `/api/v1/user/profile` and Status Code to `200 OK`.
+3. Paste your desired JSON payload in the CodeMirror editor:
+   ```json
+   {
+     "status": "success",
+     "data": {
+       "id": "usr_99812",
+       "name": "Alex Johnson",
+       "tier": "Diamond VIP",
+       "balance_usd": 145250.00
+     }
+   }
+   ```
+4. Click **Save Mock Rule**.
+
+### Step 2: Call the Endpoint from your iOS App or Terminal
+Run the request from your iOS Simulator or terminal:
+```bash
+curl -i http://localhost:8080/api/v1/user/profile
+```
+
+### Step 3: Instant Live Verification
+Your iOS app instantly receives the mocked JSON payload, and the request appears live in the **Live Traffic** pane with a `[MOCK]` badge!
+```
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Access-Control-Allow-Origin: *
+
+{
+  "status": "success",
+  "data": {
+    "id": "usr_99812",
+    "name": "Alex Johnson",
+    "tier": "Diamond VIP",
+    "balance_usd": 145250.00
+  }
+}
+```
+
+---
+
 ## 🛠️ Tech Stack
 
 | Component | Technology | Description |
