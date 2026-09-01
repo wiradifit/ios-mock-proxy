@@ -1,0 +1,23 @@
+config:
+  target_upstream: "https://sm-ple.ajaib.tech"
+  allow_production: true
+
+rules:
+  - name: "Mock Pikachu Stats (PokéAPI)"
+    enabled: true
+    method: "GET"
+    path: "/api/v2/pokemon/pikachu"
+    response:
+      status: 200
+      body: "{\n  \"id\": 25,\n  \"name\": \"pikachu\",\n  \"base_experience\": 112,\n  \"height\": 4,\n  \"weight\": 60,\n  \"is_default\": true,\n  \"species\": {\n    \"name\": \"pikachu\",\n    \"url\": \"https://pokeapi.co/api/v2/pokemon-species/25/\"\n  },\n  \"types\": [\n    {\n      \"slot\": 1,\n      \"type\": {\n        \"name\": \"electric\",\n        \"url\": \"https://pokeapi.co/api/v2/type/13/\"\n      }\n    }\n  ],\n  \"abilities\": [\n    {\n      \"ability\": {\n        \"name\": \"static\",\n        \"url\": \"https://pokeapi.co/api/v2/ability/9/\"\n      },\n      \"is_hidden\": false,\n      \"slot\": 1\n    },\n    {\n      \"ability\": {\n        \"name\": \"lightning-rod\",\n        \"url\": \"https://pokeapi.co/api/v2/ability/31/\"\n      },\n      \"is_hidden\": true,\n      \"slot\": 3\n    }\n  ],\n  \"stats\": [\n    {\n      \"base_stat\": 35,\n      \"stat\": { \"name\": \"hp\" }\n    },\n    {\n      \"base_stat\": 55,\n      \"stat\": { \"name\": \"attack\" }\n    },\n    {\n      \"base_stat\": 90,\n      \"stat\": { \"name\": \"speed\" }\n    }\n  ]\n}"
+      delay: 120
+
+  - name: "Mock Charizard Abilities (PokéAPI)"
+    enabled: true
+    method: "GET"
+    path: "/api/v2/pokemon/charizard"
+    response:
+      status: 200
+      body: "{\n  \"id\": 6,\n  \"name\": \"charizard\",\n  \"base_experience\": 240,\n  \"height\": 17,\n  \"weight\": 905,\n  \"types\": [\n    {\n      \"slot\": 1,\n      \"type\": { \"name\": \"fire\" }\n    },\n    {\n      \"slot\": 2,\n      \"type\": { \"name\": \"flying\" }\n    }\n  ]\n}"
+      delay: 150
+

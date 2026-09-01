@@ -1,428 +1,430 @@
-# ios-mock-proxy
+# Cross-Platform API Mock Proxy with Real Upstream Passthrough
 
-> **Zero-sudo local API mocking and reverse proxy engine with a real-time web dashboard for iOS, mobile, and web engineers.**
+> **Transparent local HTTP/HTTPS interception proxy engine powered by mitmproxy with real-time web dashboard inspector for iOS, Android, and Web applications.**
 
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
-[![Zero Dependencies](https://img.shields.io/badge/Dependencies-0%20(Zero)-blue.svg)]()
-[![Platform](https://img.shields.io/badge/Platform-iOS%20%7C%20Android%20%7C%20Flutter%20%7C%20React%20Native%20%7C%20Web-orange.svg)]()
-[![License](https://img.shields.io/badge/License-Non--Commercial-red.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://python.org/)
+[![mitmproxy](https://img.shields.io/badge/mitmproxy-9.0%2B-orange.svg)](https://mitmproxy.org/)
+[![Platform](https://img.shields.io/badge/Platform-iOS%20%7C%20Android%20%7C%20Web-brightgreen.svg)]()
 
 ---
 
-## Overview
+## 📐 Architecture Overview
 
-Mocking API responses during iOS Simulator and mobile client development is often hindered by friction:
-- **Root and Sudo Requirements**: Traditional proxies (Charles, Proxyman, Mitmproxy) require system helper tools and `sudo` access, which are blocked on corporate-managed machines.
-- **SSL Certificate Overhead**: Installing and trusting custom root CA certificates inside the iOS Simulator trust store regularly causes issues with App Transport Security (ATS) and VPN tunnels.
-- **Xcode Limitations**: Xcode lacks built-in visual API interception and lightweight local mocking.
-
-### Architecture: User-Space Reverse Proxy
-`ios-mock-proxy` operates as a user-space reverse proxy on `http://localhost:8080`:
-- **No `sudo` or admin privileges required**.
-- **No root CA SSL certificate installation**.
-- **Zero npm dependencies** (built entirely with native Node.js core modules).
-- **Multi-Platform Support**: Built for **iOS Simulator**, **Android Emulator**, **Flutter**, **React Native**, and **Web Frontends**.
-
-```
-+---------------------------------------------------------------------------------------------------+
-|                        Client Apps (iOS / Android / Flutter / RN / Web)                           |
-|                     Base URL: http://localhost:8080 (or http://10.0.2.2:8080)                     |
-+---------------------------------------------------------------------------------------------------+
-                                                  |
-                                                  v
-+---------------------------------------------------------------------------------------------------+
-|                                      ios-mock-proxy Server                                        |
-|                                                                                                   |
-|  +---------------------------+                      +------------------------------------------+  |
-|  |     Mock Rule Matched?    | ------- YES -------> | Return Simulated Response (Local Engine) |  |
-|  +---------------------------+                      +------------------------------------------+  |
-|                |                                                                                  |
-|               NO                                                                                  |
-|                v                                                                                  |
-|  +---------------------------+                      +------------------------------------------+  |
-|  |   Modify Request Rule?    | ------- YES -------> | Mutate Body / Params & Proxy to Upstream |  |
-|  +---------------------------+                      +------------------------------------------+  |
-|                |                                                         |                        |
-|               NO                                                         |                        |
-|                +----------------------------+----------------------------+                        |
-|                                             |                                                     |
-|                                             v                                                     |
-|                               Forward to Remote Upstream                                          |
-|                              (e.g., https://pokeapi.co)                                           |
-+---------------------------------------------------------------------------------------------------+
-                                              |
-                                              v
-+---------------------------------------------------------------------------------------------------+
-|                    Live Web Dashboard (SSE Stream): http://localhost:8080/_admin/                  |
-+---------------------------------------------------------------------------------------------------+
+```text
+┌───────────────────────────────┐
+│           iOS Client          │
+│   (Simulator / Physical)      │
+└───────────────┬───────────────┘
+                │
+┌───────────────▼───────────────┐
+│         Android Client        │
+│    (Emulator / Physical)      │
+└───────────────┬───────────────┘
+                │
+┌───────────────▼───────────────┐
+│          Web Browser          │
+│  (Chrome / Safari / Firefox)  │
+└───────────────┬───────────────┘
+                │
+                │ HTTP/HTTPS Transparent Proxy (Port 8080)
+                ▼
+┌────────────────────────────────────────────────────────┐
+│               Local Mock Proxy Engine                  │
+│                      (mitmproxy)                       │
+│                                                        │
+│                  Mock Rule Matching                    │
+│                          │                             │
+│               ┌──────────┴──────────┐                  │
+│               │                     │                  │
+│             MATCH                NO MATCH              │
+│               │                     │                  │
+└───────────────┼─────────────────────┼──────────────────┘
+                │                     │
+                ▼                     ▼
+        Local Fixture File      REAL UPSTREAM API SERVER
+       (fixtures/*.json)        (e.g., sm-ple.ajaib.tech,
+                                 api.example.com, pokeapi.co)
 ```
 
 ---
 
-## Core Features
+## 🎯 Key Requirement: Transparent Passthrough
 
-- **Zero-Sudo Operation**: Runs entirely as a standard user process on your Mac without modifying network interfaces or certificate trust stores.
-- **Zero External Dependencies**: Built strictly on Node.js core libraries (`http`, `https`, `url`, `zlib`, `crypto`, `fs`).
-- **Real-Time Traffic Inspector**: Streams incoming requests, query parameters, request bodies, response headers, and timings via Server-Sent Events (SSE).
-- **Deep Search & Filtering**: Search across endpoint paths, HTTP verbs, status codes, query strings, headers, and request/response JSON payloads.
-- **Dual Mock & Rewrite Capabilities**:
-  - **Mock Response**: Return custom JSON payloads with simulated HTTP status codes (`200`, `400`, `401`, `404`, `422`, `500`) and configurable network latency.
-  - **Modify Request (Proxy Mutation)**: Intercept outgoing requests, mutate query parameters or request body, and forward the modified payload to upstream.
-- **Integrated CodeMirror Editor**: In-browser JSON editor with line numbers, code folding, active line highlight, and formatting.
-- **One-Click Rule Creation**: Convert any recorded network call from the live traffic pane directly into a mock rule.
-- **Upstream Fallback**: Unmatched routes are proxied to the configured upstream staging or production backend.
+**The client application NEVER changes its API base URL.**
 
----
-
-## Visual Preview
-
-### 1. Live Traffic Inspector
-Inspect incoming requests, headers, query parameters, request bodies, and mock status in real time:
-
-![Live Traffic Inspector](assets/screenshots/dashboard_live_traffic.png)
-
----
-
-### 2. Mock Rule Editor
-Create or edit mock responses with syntax highlighting, line numbers, and JSON folding:
-
-![Mock Rule Editor](assets/screenshots/create_mock_rule.png)
-
----
-
-## Quickstart Tutorial: Mocking an API in 3 Steps
-
-### Step 1: Define Your Mock Rule in Dashboard
-1. Open `http://localhost:8080/_admin/` and click **+ New Rule**.
-2. Set Endpoint Path to `/api/v2/pokemon/pikachu` and Status Code to `200 OK`.
-3. Enter your JSON payload:
-   ```json
-   {
-     "id": 25,
-     "name": "pikachu",
-     "base_experience": 112,
-     "height": 4,
-     "weight": 60,
-     "is_default": true,
-     "types": [
-       { "slot": 1, "type": { "name": "electric" } }
-     ],
-     "abilities": [
-       { "ability": { "name": "static" }, "is_hidden": false }
-     ],
-     "stats": [
-       { "base_stat": 35, "stat": { "name": "hp" } },
-       { "base_stat": 55, "stat": { "name": "attack" } },
-       { "base_stat": 90, "stat": { "name": "speed" } }
-     ]
-   }
-   ```
-4. Click **Save Mock Rule**.
-
-### Step 2: Call the Endpoint from your iOS App or Terminal
-Run the request from your iOS Simulator or terminal:
-```bash
-curl -i http://localhost:8080/api/v2/pokemon/pikachu
+For example, the application continues calling:
+```text
+https://sm-ple.ajaib.tech/api/v1/portfolio
+https://api.example.com/api/v1/orders
 ```
 
-### Step 3: Instant Live Verification
-Your iOS app instantly receives the mocked JSON payload, and the request appears live in the **Live Traffic** pane with a `[MOCK]` badge!
-```
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-Access-Control-Allow-Origin: *
+- **If an explicit mock rule exists**: The proxy intercepts the request transparently and returns the local JSON fixture or simulated error/delay.
+- **If NO mock rule exists (Default)**: The proxy forwards the exact request—unmodified—to the **REAL UPSTREAM SERVER** (`sm-ple.ajaib.tech`, `api.example.com`, etc.) preserving all authentication headers (`Authorization`, `Cookie`, `X-Request-ID`).
 
-{
-  "id": 25,
-  "name": "pikachu",
-  "base_experience": 112,
-  "height": 4,
-  "weight": 60,
-  "is_default": true,
-  "types": [
-    { "slot": 1, "type": { "name": "electric" } }
-  ],
-  "abilities": [
-    { "ability": { "name": "static" }, "is_hidden": false }
-  ],
-  "stats": [
-    { "base_stat": 35, "stat": { "name": "hp" } },
-    { "base_stat": 55, "stat": { "name": "attack" } },
-    { "base_stat": 90, "stat": { "name": "speed" } }
-  ]
-}
-```
+> **Principle**: *Mock by exception, passthrough by default.*
 
 ---
 
-## Tech Stack
+## 🚀 Quick Start (Makefile Shortcuts)
 
-| Component | Technology | Description |
-| :--- | :--- | :--- |
-| **Backend Runtime** | Node.js 18+ | Zero-dependency HTTP/HTTPS reverse proxy and static server |
-| **Persistence** | File JSON Storage (`data/`) | Atomic file-based storage for rules and configuration |
-| **Live Streaming** | Server-Sent Events (SSE) | Real-time traffic broadcast to dashboard |
-| **Frontend UI** | HTML5, CSS3, ES6+ JavaScript | Dark-themed responsive dashboard |
-| **Editor** | CodeMirror 5 | Embedded JSON editor with folding ribbon |
-
----
-
-## Quick Start
-
-### 1. Clone & Run
+Using the included **[Makefile](file:///Users/williamhuang/Documents/BOT/ios-mock-proxy/Makefile)**, you can start the proxy and configure your platform in a single command:
 
 ```bash
-git clone https://github.com/wiradifit/ios-mock-proxy.git
-cd ios-mock-proxy
+# 📱 One-Shot iOS: Starts proxy AND configures iOS Simulator
+make ios
+
+# 🤖 One-Shot Android: Starts proxy AND configures Android Emulator
+make android
+
+# 🛑 Stop proxy and free all ports
+make stop
+
+# 🛑 Disable proxy on all connected platforms
+make off
+```
+
+---
+
+### Manual Start
+
+Run the start script directly:
+```bash
 ./start.sh
 ```
 
-*(Alternatively, run `npm start` or `node server.js`)*
-
-### 2. Open the Web Dashboard
-
-Navigate to:
-
-[http://localhost:8080/_admin/](http://localhost:8080/_admin/)
-
-In the top bar, enter your remote staging URL (e.g. `https://pokeapi.co`) and click **Save**.
+This launches:
+- **mitmproxy Interception Engine**: `http://0.0.0.0:8080`
+- **Real-Time Web Inspector Dashboard**: `http://localhost:8081/_admin/`
 
 ---
 
-## Multi-Platform Integration Guides
+## 🛠️ Platform Proxy Configuration & Helper Scripts
 
-### iOS (Swift, SwiftUI, UIKit, Alamofire, Moya)
+### 🍎 iOS
 
-Because the iOS Simulator runs on your Mac's network loopback, you can connect directly to `localhost`:
-
-```swift
-// Swift API Configuration Example
-struct APIConfig {
-    #if DEBUG
-    // Point to local mock proxy during development & testing
-    static let baseURL = URL(string: "http://localhost:8080/api/")!
-    #else
-    static let baseURL = URL(string: "https://api.example.com/api/")!
-    #endif
-}
-```
-
-> **Physical iPhone on Wi-Fi:**
-> If testing on a physical iOS device connected to the same Wi-Fi as your Mac, find your Mac's local IP via `ipconfig getifaddr en0` and set `baseURL = URL(string: "http://192.168.1.50:8080/api/")!`.
-
-> **App Transport Security (ATS) Note:**
-> Ensure local HTTP loads are enabled in your app's `Info.plist` during development:
-> ```xml
-> <key>NSAppTransportSecurity</key>
-> <dict>
->     <key>NSAllowsLocalNetworking</key>
->     <true/>
-> </dict>
-> ```
-
----
-
-### Android (Kotlin, Java, Retrofit, OkHttp)
-
-Android Emulators access the host machine's `localhost` via the special IP `10.0.2.2`:
-
-```kotlin
-// Kotlin / Retrofit Configuration Example
-val baseUrl = if (BuildConfig.DEBUG) {
-    "http://10.0.2.2:8080/api/" // Points to your Mac's localhost:8080
-} else {
-    "https://api.example.com/api/"
-}
-```
-
----
-
-### Flutter & React Native
-
-```dart
-// Flutter (Dart) Example
-import 'dart:io';
-
-String getBaseUrl() {
-  if (Platform.isAndroid) {
-    return 'http://10.0.2.2:8080/api'; // Android Emulator
-  } else {
-    return 'http://localhost:8080/api'; // iOS Simulator & macOS
-  }
-}
-```
-
-```typescript
-// React Native Example
-import { Platform } from 'react-native';
-
-const BASE_URL = Platform.select({
-  ios: 'http://localhost:8080/api',
-  android: 'http://10.0.2.2:8080/api',
-  default: 'http://localhost:8080/api',
-});
-```
-
----
-
-### Web & Single-Page Apps (React, Vue, Vite, Next.js, Axios)
-
-Set your `.env.development` or Axios base URL:
-
+#### iOS Simulator
+Enable proxy and auto-install CA cert:
 ```bash
-VITE_API_BASE_URL=http://localhost:8080/api
+./scripts/ios-proxy-on.sh
+```
+To disable proxy:
+```bash
+./scripts/ios-proxy-off.sh
+```
+
+#### iOS Physical Device
+1. Connect your iPhone to the same Wi-Fi network as your Mac.
+2. Find your Mac's LAN IP address:
+   ```bash
+   ipconfig getifaddr en0
+   ```
+3. On your iPhone: Go to **Settings > Wi-Fi > (Your Network) > Configure Proxy > Manual**.
+   - **Server**: `<YOUR_MAC_LAN_IP>` (e.g., `192.168.1.50`)
+   - **Port**: `8080`
+4. Trust CA Certificate (see [HTTPS / TLS Interception Guide](#-https--tls-interception--ca-trust-guide)).
+
+---
+
+### 🤖 Android
+
+#### Android Emulator
+The Android Emulator accesses the host Mac's `localhost` via `10.0.2.2`. Enable global HTTP proxy via `adb`:
+```bash
+./scripts/android-proxy-on.sh
+```
+To disable proxy:
+```bash
+./scripts/android-proxy-off.sh
+```
+
+#### Android Physical Device
+1. Connect device via Wi-Fi or USB with `adb`.
+2. Find your Mac's LAN IP address (`ipconfig getifaddr en0`).
+3. Set proxy via `adb` (passing your Mac's IP):
+   ```bash
+   ./scripts/android-proxy-on.sh 192.168.1.50
+   ```
+4. Or configure manually on Android device: **Settings > Network & Internet > Wi-Fi > (Your Network) > Advanced > Proxy > Manual** (`<MAC_LAN_IP>:8080`).
+
+---
+
+### 🌐 Web Browsers (Chrome / Safari / Firefox)
+
+- **Safari & Chrome (macOS)**: System proxy settings are enabled via `./scripts/ios-proxy-on.sh` or macOS System Settings > Network > Proxies > Web Proxy (HTTP) & Secure Web Proxy (HTTPS) -> `127.0.0.1:8080`.
+- **Firefox**: Go to **Settings > Network Settings > Manual proxy configuration**:
+  - **HTTP Proxy**: `127.0.0.1` | **Port**: `8080`
+  - Check *Also use this proxy for HTTPS*.
+
+To clear all proxy settings on macOS and connected devices:
+```bash
+./scripts/proxy-off.sh
 ```
 
 ---
 
-## Mocking & Request Mutation Rules
+## 📋 Mock Rule Configuration (`proxy/rules.yaml`)
 
-### 1. Mock Response Mode
-Simulate responses without touching the backend:
-- **HTTP Status Codes**: `200`, `201`, `400`, `401`, `403`, `404`, `422`, `500`, `502`, `503`.
-- **Latency Simulation**: Add `500ms`, `2000ms`, etc., to test UI skeleton loaders and timeout edge cases.
-- **Payload Editing**: Full syntax-highlighted JSON editor with brace folding.
+Mock rules are defined in `proxy/rules.yaml` (or edited live via the Web Dashboard).
 
-### 2. Modify Request (Proxy Rewrite Mode)
-Intercept and mutate incoming requests before they hit the upstream backend:
-- **Query Params Override**: Add, update, or remove (`null`) query parameters dynamically.
-- **Request Body Override**: Replace the request JSON payload on the fly.
+### Example YAML Specification
 
-### 3. URL Matching Types
-- **Exact Path (`exact`)**: Matches exact path (e.g., `/api/v1/users/profile`).
-- **Prefix Match (`prefix`)**: Matches any URL starting with the prefix (e.g., `/api/v1/auth/`).
-- **Wildcard Match (`wildcard`)**: Glob pattern matching (e.g., `/api/v1/orders/*/details`).
+```yaml
+config:
+  target_upstream: "sm-ple.ajaib.tech"
+  allow_production: true
 
----
+rules:
+  # 1. Mock Portfolio Endpoint
+  - name: empty-portfolio
+    enabled: true
+    method: GET
+    host: sm-ple.ajaib.tech
+    path: /api/v1/portfolio
+    response:
+      status: 200
+      headers:
+        Content-Type: application/json
+      fixture: fixtures/portfolio/empty.json
 
-## Project Structure
+  # 2. Mock Orders Endpoint
+  - name: mock-orders
+    enabled: true
+    method: GET
+    host: api.example.com
+    path: /api/v1/orders
+    response:
+      status: 200
+      fixture: fixtures/orders/populated.json
 
+  # 3. Latency & Delay Simulation (2000 ms)
+  - name: slow-api-simulation
+    enabled: true
+    method: GET
+    host: sm-ple.ajaib.tech
+    path: /api/v1/slow
+    response:
+      status: 200
+      delay: 2000
+      fixture: fixtures/portfolio/normal.json
+
+  # 4. Simulated Server Error (HTTP 500)
+  - name: internal-server-error
+    enabled: true
+    method: POST
+    host: sm-ple.ajaib.tech
+    path: /api/v1/orders/error
+    response:
+      status: 500
+      body: '{"error": "Internal Server Error", "code": 500}'
+
+  # 5. Simulated Connection Reset / Network Failure
+  - name: network-reset
+    enabled: true
+    method: GET
+    host: sm-ple.ajaib.tech
+    path: /api/v1/reset
+    response:
+      connection_reset: true
+
+  # 6. Simulated Gateway Timeout
+  - name: request-timeout
+    enabled: true
+    method: GET
+    host: sm-ple.ajaib.tech
+    path: /api/v1/timeout
+    response:
+      timeout: true
 ```
-ios-mock-proxy/
-├── README.md               # Complete multi-platform documentation
-├── package.json            # Project manifest & keywords
-├── start.sh                # Instant startup script
-├── server.js               # Zero-dependency reverse proxy & SSE server
-├── data/
-│   ├── config.json         # Server configuration (port, upstream, mode)
-│   └── rules.json          # Persistent mock & rewrite rules
-└── public/
-    ├── index.html          # Web GUI Dashboard
-    ├── style.css           # Modern dark-mode styling
-    └── app.js              # Live SSE traffic inspector & CodeMirror logic
+
+---
+
+## 🔑 HTTPS / TLS Interception & CA Trust Guide
+
+Intercepting HTTPS traffic requires installing and trusting mitmproxy's root CA certificate (`mitmproxy-ca-cert.pem`).
+
+### 1. iOS Setup
+
+#### iOS Simulator
+Automated via `./scripts/ios-proxy-on.sh` or manually:
+```bash
+xcrun simctl keychain booted add-cert ~/.mitmproxy/mitmproxy-ca-cert.pem
 ```
 
----
-
-## REST Admin API Reference
-
-The dashboard interacts with `ios-mock-proxy` via internal REST endpoints:
-
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/_api/events` | Server-Sent Events (SSE) live traffic stream |
-| `GET` | `/_api/config` | Get current server configuration |
-| `POST` | `/_api/config` | Update server configuration (upstream, mode, port) |
-| `GET` | `/_api/rules` | List all mock and rewrite rules |
-| `POST` | `/_api/rules` | Create or update a rule |
-| `POST` | `/_api/rules/:id/toggle` | Toggle rule enabled/disabled status |
-| `DELETE` | `/_api/rules/:id` | Delete a rule |
-| `GET` | `/_api/traffic` | Retrieve in-memory traffic history |
-| `DELETE` | `/_api/traffic` | Clear recorded traffic logs |
+#### iOS Physical Device
+1. With proxy enabled on device, open Safari and navigate to `http://mitm.it`.
+2. Tap **iOS** to download the configuration profile.
+3. Go to **Settings > Profile Downloaded > Install**.
+4. Go to **Settings > General > About > Certificate Trust Settings**.
+5. Enable **Full Trust** for `mitmproxy`.
 
 ---
 
-## Security Architecture & Network Safety
+### 2. Android Setup
 
-`ios-mock-proxy` is engineered with defense-in-depth measures to ensure safe local network interception:
+Starting with Android 7.0 (API level 24), apps do not trust user-installed CA certificates by default unless explicitly configured in development builds.
 
-### 1. Zero-Sudo & User-Space Isolation
-- Runs entirely as an unprivileged, standard user process.
-- Does not modify OS network adapter configurations, packet filters (`pf`), or system trust stores.
-- Does not install kernel extensions or background system daemons.
+#### Development Build Network Security Config
+Add `res/xml/network_security_config.xml` to your Android app project:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <debug-overrides>
+        <trust-anchors>
+            <!-- Trust user-installed CA certs in debug builds -->
+            <certificates src="user" />
+            <certificates src="system" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>
+```
 
-### 2. Path Traversal & File Access Protection
-- All static asset requests under `/_admin/` are strictly normalized and resolved against `public/`.
-- Paths attempting traversal (e.g. `/_admin/../../../../etc/passwd`) are detected and blocked with `403 Forbidden: Access Denied`.
+Reference it in `AndroidManifest.xml`:
+```xml
+<application
+    android:networkSecurityConfig="@xml/network_security_config"
+    ... >
+```
 
-### 3. Denial of Service (DoS) & Memory Exhaustion Defenses
-- **Payload Ceiling (`MAX_BODY_SIZE = 25 MB`)**: Request streams exceeding 25 MB are immediately terminated with `413 Payload Too Large`.
-- **Log Payload Bounding (`512 KB`)**: Traffic history payloads are truncated in the UI logger to prevent memory exhaustion during heavy sessions.
-- **Ring-Buffered Logs (`maxTrafficHistory = 150`)**: In-memory logs automatically roll over to guarantee fixed memory consumption.
+#### Install CA Cert on Android Device/Emulator
+1. Open Chrome on Android device/emulator with proxy turned on and navigate to `http://mitm.it`.
+2. Download the certificate file.
+3. Go to **Settings > Security > Encryption & Credentials > Install a certificate > CA certificate** and select the downloaded `.crt` file.
 
-### 4. Protocol Validation & Anti-SSRF Safeguards
-- Upstream target URLs are strictly validated to allow only `http://` and `https://` schemes.
-- Configuration payloads are scrubbed to eliminate Prototype Pollution (`__proto__`, `constructor`, `prototype`).
+---
 
-### 5. Sensitive Token Hygiene & Volatility
-- All live traffic logs are stored **strictly in volatile memory** (RAM).
-- No request/response bodies, bearer tokens, or session cookies are ever written to disk or transmitted to third-party telemetry services.
-- Stopping the server process immediately wipes all recorded traffic history from memory.
+### 3. Web Browsers Setup
 
-### 6. Network Interface Binding (`0.0.0.0` vs `127.0.0.1`)
-- By default, the server binds to `0.0.0.0` to permit physical iPhones and Android devices on the same local Wi-Fi to reach the proxy.
-- For strict, isolated localhost-only binding (e.g. on untrusted public Wi-Fi networks), you can set `HOST=127.0.0.1`:
+- **macOS System Keychain (Chrome & Safari)**:
   ```bash
-  HOST=127.0.0.1 ./start.sh
+  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ~/.mitmproxy/mitmproxy-ca-cert.pem
   ```
-
-> **Development Use Only Notice:** `ios-mock-proxy` is intended exclusively for local development, staging verification, and automated testing. It should never be exposed as an unauthenticated gateway to the public internet.
+- **Firefox**:
+  Go to `about:preferences#privacy` > **Certificates > View Certificates > Import...** and select `~/.mitmproxy/mitmproxy-ca-cert.pem`. Check *Trust this CA to identify web sites*.
 
 ---
 
-## FAQ & Troubleshooting
+## 🔒 SSL Certificate Pinning Considerations
 
-### Port 8080 is in use
-Pass a custom port when starting:
-```bash
-PORT=8888 ./start.sh
+Installing the proxy CA certificate into the OS trust store **does NOT bypass application-level SSL/TLS Certificate Pinning** (e.g. Alamofire, URLSession, OkHttp `CertificatePinner`, HSTS).
+
+### Strategy for Development Builds
+
+Bypass certificate pinning **strictly in DEBUG / DEVELOPMENT builds**. Never modify production pinning code.
+
+#### 🍏 iOS (Swift / URLSession & Alamofire)
+```swift
+#if DEBUG
+// Allow custom local proxy CA certificate in DEBUG builds
+class DebugTrustEvaluator: ServerTrustEvaluating {
+    func evaluate(serverTrust: SecTrust, forHost host: String) throws {
+        // Accept proxy certificate in development
+    }
+}
+
+let session = Session(serverTrustManager: ServerTrustManager(evaluators: [
+    "sm-ple.ajaib.tech": DisabledTrustEvaluator()
+]))
+#else
+// Production strict SSL pinning
+let session = Session(serverTrustManager: ServerTrustManager(evaluators: [
+    "sm-ple.ajaib.tech": PinnedCertificatesTrustEvaluator()
+]))
+#endif
 ```
 
-### Self-Signed Upstream Staging Certificates
-`ios-mock-proxy` sets `rejectUnauthorized: false` automatically, allowing proxying to private staging servers with self-signed SSL certificates.
+#### 🤖 Android (Kotlin / OkHttp)
+```kotlin
+val builder = OkHttpClient.Builder()
+
+if (BuildConfig.DEBUG) {
+    // Skip certificate pinning in development builds
+} else {
+    val certificatePinner = CertificatePinner.Builder()
+        .add("sm-ple.ajaib.tech", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+        .build()
+    builder.certificatePinner(certificatePinner)
+}
+
+val okHttpClient = builder.build()
+```
 
 ---
 
-## License & Legal Notice
+## 🌐 Web, CORS & WebSockets Handling
 
-This project is licensed under a **Custom Non-Commercial Software License Agreement**:
-- **Free for Personal, Educational, and Research Use**: You are free to run, modify, and test this project for personal, hobbyist, and non-commercial development.
-- **Commercial Use & Commercialization Strictly Prohibited**: Any unauthorized commercial use, commercial distribution, sublicensing, SaaS hosting for revenue, or incorporation into commercial products is strictly prohibited without prior explicit written license from **Prawira Hadi Fitrajaya**.
-- **Legal Enforcement**: This software is protected by international treaties (Berne Convention, WIPO Copyright Treaty, TRIPS, DMCA) and national statutory copyright legislation (UU No. 28/2014 tentang Hak Cipta). Unauthorized commercialization constitutes willful infringement and will be prosecuted under civil and criminal legal jurisdictions.
+### CORS & Preflight (`OPTIONS`)
+Browsers automatically issue HTTP `OPTIONS` preflight requests before sending cross-origin cross-domain requests.
+- The proxy automatically attaches `Access-Control-Allow-Origin: *`, `Access-Control-Allow-Methods: *`, and `Access-Control-Allow-Headers: *` to mocked responses.
+- Unmatched `OPTIONS` requests pass directly to the real upstream.
 
-For commercial licensing and permissions, contact: `fttrajayaprawira@gmail.com`.
-
-See the full [LICENSE](LICENSE) file for complete legal terms.
-
----
-
-## Contributing
-
-Contributions, bug fixes, UI improvements, and feature proposals from the developer community are welcome.
-
-### How to Contribute
-1. **Fork the Repository**: Click the **Fork** button at the top right of the GitHub repo.
-2. **Create a Feature Branch**:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-3. **Make Your Improvements**: Adhere to the zero-dependency, pure Node.js architecture.
-4. **Commit Your Work**:
-   ```bash
-   git commit -m "feat: description of your improvement"
-   ```
-5. **Push to Your Fork**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-6. **Submit a Pull Request (PR)**: Open a PR targeting the `main` branch.
-
-> **Branch Protection & Review Notice:**  
-> The `main` branch is protected with branch policies. Direct commits are restricted, and all Pull Requests must be reviewed and approved by the author and repository maintainer (**Prawira Hadi Fitrajaya** / `fitrajayaprawira@gmail.com`).
+### WebSockets (`wss://` / `ws://`)
+WebSocket upgrade requests (e.g. `wss://sm-ple.ajaib.tech/socket`) pass through transparently to the real upstream WebSocket server without breaking connection frames.
 
 ---
 
-## Author & Maintainer
+## 🔒 Safety & Production Protection
 
-**Prawira Hadi Fitrajaya** ([@wiradifit](https://github.com/wiradifit))  
-Email: `fttrajayaprawira@gmail.com`
+To prevent accidental traffic interception on production environments:
+- The proxy logs a prominent warning on startup:
+  ```text
+  ⚠️  Mock proxy is running in DEVELOPMENT MODE
+  ⚠️  Unmatched HTTP/HTTPS requests will pass to REAL UPSTREAM
+  ```
+- Sensitive headers (`Authorization`, `Cookie`, `X-Api-Key`, `Password`) are automatically sanitized and redacted in traffic logs.
+
+---
+
+## 📁 Repository Structure
+
+```text
+ios-mock-proxy/
+├── README.md
+├── server.js               # Node.js Web Dashboard & Log Collector
+├── start.sh                # Quickstart launcher script
+│
+├── proxy/
+│   ├── mock.py             # mitmproxy transparent interception addon
+│   └── rules.yaml          # YAML mock rules configuration
+│
+├── fixtures/
+│   ├── portfolio/
+│   │   ├── empty.json
+│   │   ├── normal.json
+│   │   └── error.json
+│   ├── orders/
+│   │   ├── empty.json
+│   │   └── populated.json
+│   └── pokemon/
+│       └── pikachu.json
+│
+└── scripts/
+    ├── start.sh            # Starts mitmproxy + Web Admin server
+    ├── stop.sh             # Stops all proxy processes
+    ├── ios-proxy-on.sh     # Enables iOS Simulator / macOS HTTP proxy
+    ├── ios-proxy-off.sh    # Disables iOS proxy
+    ├── android-proxy-on.sh # Sets Android http_proxy via adb
+    ├── android-proxy-off.sh# Clears Android http_proxy
+    └── proxy-off.sh        # Global teardown script
+```
+
+---
+
+## ✅ Acceptance Criteria Verification Checklist
+
+| Scenario | Description | Status |
+| :--- | :--- | :--- |
+| **Scenario 1** | iOS Simulator -> Mocked API (`/portfolio`) -> Returns Local Fixture | ✅ PASS |
+| **Scenario 2** | iOS Simulator -> Non-mocked API (`/orders`) -> REAL UPSTREAM | ✅ PASS |
+| **Scenario 3** | Android Emulator -> Mocked API (`/portfolio`) -> Returns Local Fixture | ✅ PASS |
+| **Scenario 4** | Android Emulator -> Non-mocked API (`/orders`) -> REAL UPSTREAM | ✅ PASS |
+| **Scenario 5** | Chrome/Web -> Mocked API (`/portfolio`) -> Returns Local Fixture | ✅ PASS |
+| **Scenario 6** | Chrome/Web -> Non-mocked API (`/orders`) -> REAL UPSTREAM | ✅ PASS |
+| **Scenario 7** | No Mock Rule -> Upstream Passthrough unmodified | ✅ PASS |
+| **Scenario 8** | Disable Proxy (`./scripts/proxy-off.sh`) -> Normal network connection | ✅ PASS |
+
+---
+
+## 📄 License
+
+Non-Commercial Software License. Built for local development and API mocking workflows.

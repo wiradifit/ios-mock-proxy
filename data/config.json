@@ -1,6 +1,6 @@
 {
   "port": 8080,
-  "upstream": "https://pokeapi.co",
+  "upstream": "https://sm-ple.ajaib.tech",
   "mockMode": "fallback",
   "recordTraffic": true,
   "maxTrafficHistory": 100

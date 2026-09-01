@@ -14,3 +14,5 @@ yarn-debug.log*
 .idea/
 .vscode/
 *.sw?
+.proxy.pid
+venv
