@@ -30,15 +30,17 @@ const DATA_DIR = path.join(__dirname, 'data');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const CONFIG_FILE = path.join(DATA_DIR, 'config.json');
 const RULES_FILE = path.join(DATA_DIR, 'rules.json');
+const PROXY_RULES_YAML = path.join(__dirname, 'proxy', 'rules.yaml');
 
 // Ensure directories exist
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(PUBLIC_DIR)) fs.mkdirSync(PUBLIC_DIR, { recursive: true });
+if (!fs.existsSync(path.dirname(PROXY_RULES_YAML))) fs.mkdirSync(path.dirname(PROXY_RULES_YAML), { recursive: true });
 
 // State
 let config = {
   port: 8080,
-  upstream: 'https://pokeapi.co',
+  upstream: 'sm-ple.ajaib.tech',
   mockMode: 'fallback', // 'fallback' | 'mock_only' | 'passthrough'
   recordTraffic: true,
   maxTrafficHistory: 150
@@ -47,6 +49,44 @@ let config = {
 let rules = [];
 const trafficLogs = [];
 const sseClients = new Set();
+
+// Synchronize rules to proxy/rules.yaml for mitmproxy
+function syncYamlRules() {
+  try {
+    let yamlStr = `config:\n`;
+    yamlStr += `  target_upstream: "${config.upstream || 'sm-ple.ajaib.tech'}"\n`;
+    yamlStr += `  allow_production: true\n\n`;
+    yamlStr += `rules:\n`;
+
+    for (const r of rules) {
+      if (r.enabled === false) continue;
+      const ruleName = (r.name || r.path || 'rule').replace(/"/g, "'");
+      yamlStr += `  - name: "${ruleName}"\n`;
+      yamlStr += `    enabled: true\n`;
+      yamlStr += `    method: "${(r.method || 'GET').toUpperCase()}"\n`;
+      if (r.host) {
+        yamlStr += `    host: "${r.host}"\n`;
+      }
+      yamlStr += `    path: "${r.path || '/'}"\n`;
+      yamlStr += `    response:\n`;
+      yamlStr += `      status: ${r.statusCode || 200}\n`;
+      if (r.fixture) {
+        yamlStr += `      fixture: "${r.fixture}"\n`;
+      } else if (r.body) {
+        const bodyVal = typeof r.body === 'string' ? r.body : JSON.stringify(r.body);
+        yamlStr += `      body: ${JSON.stringify(bodyVal)}\n`;
+      }
+      if (r.delay) {
+        yamlStr += `      delay: ${r.delay}\n`;
+      }
+      yamlStr += `\n`;
+    }
+
+    fs.writeFileSync(PROXY_RULES_YAML, yamlStr, 'utf8');
+  } catch (err) {
+    console.error('[YAML Sync Error]', err.message);
+  }
+}
 
 // Load persistent data
 function loadConfig() {
@@ -64,6 +104,7 @@ function loadConfig() {
 function saveConfig() {
   try {
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf8');
+    syncYamlRules();
   } catch (err) {
     console.error('[Config] Failed to save config:', err.message);
   }
@@ -84,6 +125,7 @@ function loadRules() {
 function saveRules() {
   try {
     fs.writeFileSync(RULES_FILE, JSON.stringify(rules, null, 2), 'utf8');
+    syncYamlRules();
   } catch (err) {
     console.error('[Rules] Failed to save rules:', err.message);
   }
@@ -336,6 +378,36 @@ async function handleAdmin(req, res, parsedUrl) {
     rules = rules.filter(r => r.id !== id);
     saveRules();
     broadcastEvent('rules_updated', rules);
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    return res.end(JSON.stringify({ status: 'ok' }));
+  }
+
+  if (pathname === '/_admin/api/traffic' && method === 'POST') {
+    const rawBody = await readRequestBody(req);
+    const logData = safeJsonParse(rawBody.toString('utf8'));
+    if (logData) {
+      addTrafficLog({
+        id: logData.id || 'log_' + Date.now(),
+        timestamp: new Date(logData.timestamp || Date.now()).toISOString(),
+        method: logData.method,
+        url: logData.full_url || logData.path,
+        path: logData.path,
+        status: logData.status,
+        duration: logData.duration_ms,
+        isMock: logData.type === 'MOCK',
+        error: logData.type === 'ERROR' ? logData.detail : null,
+        detail: logData.detail,
+        request: {
+          headers: logData.request_headers || {},
+          queryParams: {},
+          body: logData.request_body || ''
+        },
+        response: {
+          headers: logData.response_headers || {},
+          body: logData.response_body || ''
+        }
+      });
+    }
     res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
     return res.end(JSON.stringify({ status: 'ok' }));
   }
@@ -727,12 +799,11 @@ const server = http.createServer(async (req, res) => {
   return proxyToUpstream(req, res, reqBody, startTime, logId);
 });
 
-const PORT = process.env.PORT || config.port || 8080;
+const PORT = process.env.ADMIN_PORT || process.env.PORT || 8081;
 const HOST = process.env.HOST || '0.0.0.0';
 server.listen(PORT, HOST, () => {
   console.log('----------------------------------------------------');
-  console.log(`  ios-mock-proxy running on http://${HOST}:${PORT}`);
-  console.log(`  Dashboard:       http://localhost:${PORT}/_admin/`);
-  console.log(`  Upstream Target: ${config.upstream || '(None configured)'}`);
+  console.log(`  Web Inspector Dashboard running on http://${HOST}:${PORT}/_admin/`);
+  console.log(`  Default Target Upstream: ${config.upstream || 'sm-ple.ajaib.tech'}`);
   console.log('----------------------------------------------------');
 });
